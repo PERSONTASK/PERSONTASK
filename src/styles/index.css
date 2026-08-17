@@ -1,0 +1,120 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── PERSONTASK design tokens ──────────────────────────────────────────
+   Surfaces and ink are theme-driven RGB triples so Tailwind's <alpha-value>
+   works (e.g. bg-surface-raised, text-ink-soft, border-line/10). */
+:root,
+:root[data-theme='dark'] {
+  --surface-base: 11 11 20;
+  --surface-raised: 22 22 34;
+  --surface-overlay: 30 30 46;
+  --ink: 238 238 248;
+  --ink-soft: 150 150 178;
+  --ink-faint: 96 96 130;
+  --line: 255 255 255;
+  --pt-font: 'Roboto';
+  color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+  --surface-base: 243 243 250;
+  --surface-raised: 255 255 255;
+  --surface-overlay: 255 255 255;
+  --ink: 15 15 30;
+  --ink-soft: 90 90 122;
+  --ink-faint: 150 150 184;
+  --line: 12 12 30;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) {
+    --surface-base: 243 243 250;
+    --surface-raised: 255 255 255;
+    --surface-overlay: 255 255 255;
+    --ink: 15 15 30;
+    --ink-soft: 90 90 122;
+    --ink-faint: 150 150 184;
+    --line: 12 12 30;
+    color-scheme: light;
+  }
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-surface-base text-ink antialiased;
+  font-family: var(--pt-font, 'Roboto'), system-ui, -apple-system, sans-serif;
+  margin: 0;
+}
+
+/* Optional Espaço background image (Premium). Set --space-bg on a wrapper. */
+.space-bg {
+  background-image: var(--space-bg, none);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+/* Scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--line) / 0.2) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgb(var(--line) / 0.18);
+  border-radius: 8px;
+}
+
+/* Focus ring — always visible for keyboard users */
+:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Reusable component classes */
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-50 disabled:pointer-events-none;
+  }
+  .btn-primary {
+    @apply btn bg-brand-gradient text-white hover:brightness-110 shadow-sm;
+  }
+  .btn-secondary {
+    @apply btn border border-line/15 bg-surface-raised text-ink hover:border-brand-indigo/60;
+  }
+  .btn-ghost {
+    @apply btn text-ink-soft hover:bg-line/5 hover:text-ink;
+  }
+  .btn-danger {
+    @apply btn border border-red-500/30 bg-red-500/10 text-red-500 hover:bg-red-500/20;
+  }
+  .field {
+    @apply w-full rounded-lg border border-line/15 bg-surface-raised px-3 py-2 text-sm text-ink placeholder:text-ink-faint outline-none focus:border-brand-indigo/60;
+  }
+  .label {
+    @apply text-[11px] font-bold uppercase tracking-wider text-ink-faint;
+  }
+  .card {
+    @apply rounded-xl border border-line/10 bg-surface-raised shadow-card;
+  }
+}

@@ -1,0 +1,14 @@
+# PERSONTASK — deploy no Netlify
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# SPA: qualquer rota cai no index.html (o React Router assume).
+# (Também garantido por public/_redirects, que vai para dist/ no build.)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
