@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Modal } from '@/components/Modal';
 import { Spinner } from '@/components/Spinner';
 import { api } from '@/lib/api';
+import { APP_URL } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import type { Space } from '@/types';
 
@@ -26,6 +27,23 @@ export function CreateSpaceDialog({
     setBusy(true);
     try {
       const space = await api.spaces.create({ name: name.trim(), description, owner_id: user.id });
+      // Semeia o card de boas-vindas ("ESTÁ PERDIDO?! COMECE POR AQUI") no idioma
+      // atual. Não bloqueia a criação do Espaço caso a semeadura falhe.
+      try {
+        await api.spaces.seedWelcome({
+          spaceId: space.id,
+          ownerId: user.id,
+          boardName: t('welcome.boardName'),
+          columnTitle: t('welcome.columnTitle'),
+          cardTitle: t('welcome.cardTitle'),
+          cardBody: t('welcome.cardBody', {
+            url: `${APP_URL}/manual.html`,
+            pdf: `${APP_URL}/PERSONTASK-Manual.pdf`,
+          }),
+        });
+      } catch {
+        /* segue mesmo se a semeadura falhar */
+      }
       setName('');
       setDescription('');
       onCreated(space);

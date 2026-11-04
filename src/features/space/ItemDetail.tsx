@@ -1,14 +1,15 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Trash2, Users, Tag, Calendar, ListChecks, Paperclip, MessageSquare, CheckSquare, Save, Copy,
+  Trash2, Users, Tag, Calendar, CalendarRange, ListChecks, Paperclip, MessageSquare, CheckSquare, Save, Copy, ExternalLink, ArrowRightLeft, Building2, CheckCircle2, Circle,
 } from 'lucide-react';
-import type { Attachment, Comment, FieldType, Item, ItemFieldValue } from '@/types';
+import type { Attachment, Board, Column, Comment, FieldType, Item, ItemFieldValue, Space } from '@/types';
 import { api } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSpace } from '@/contexts/SpaceContext';
-import { SidePanel } from '@/components/Modal';
+import { Modal, SidePanel } from '@/components/Modal';
 import { Spinner } from '@/components/Spinner';
+import { cn } from '@/lib/utils';
 import { AssigneePicker } from './AssigneePicker';
 import { LabelPicker } from './LabelPicker';
 import { CustomFieldsEditor } from './CustomFieldsEditor';
@@ -16,6 +17,8 @@ import { AttachmentsEditor } from './AttachmentsEditor';
 import { CommentsThread } from './CommentsThread';
 import { ChecklistsEditor } from './ChecklistsEditor';
 import { AddToCardMenu, type AddOption } from './AddToCardMenu';
+import { ClientSection } from './ClientSection';
+import { ScheduleSection } from './ScheduleSection';
 
 function Section({ id, icon, title, children }: { id?: string; icon: ReactNode; title: string; children: ReactNode }) {
   return (
@@ -30,6 +33,14 @@ function Section({ id, icon, title, children }: { id?: string; icon: ReactNode; 
 
 function toDateInput(iso: string | null): string {
   return iso ? new Date(iso).toISOString().slice(0, 10) : '';
+}
+
+/** Extrai URLs (http/https) do texto para exibir como links clicáveis. */
+function extractUrls(text: string | null | undefined): string[] {
+  if (!text) return [];
+  const matches = text.match(/https?:\/\/[^\s<>()"']+/g) ?? [];
+  const cleaned = matches.map((u) => u.replace(/[.,;:!?]+$/, ''));
+  return Array.from(new Set(cleaned));
 }
 
 const NEW_FIELD_TYPES: FieldType[] = ['text', 'number', 'datetime', 'checkbox', 'select'];
@@ -57,9 +68,12 @@ export function ItemDetail({
   const [newField, setNewField] = useState<{ name: string; type: FieldType } | null>(null);
   const [saving, setSaving] = useState(false);
   const [duplicating, setDuplicating] = useState(false);
+  const [moveOpen, setMoveOpen] = useState(false);
+  const [linkedSpaces, setLinkedSpaces] = useState<Space[]>([]);
 
   const canEdit = can('item.edit');
   const canManageFields = can('field.manage');
+  const isSpaceAdmin = can('space.manage');
 
   useEffect(() => {
     let active = true;
@@ -81,6 +95,11 @@ export function ItemDetail({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemId]);
 
+  // Espaços interligados (para mover/copiar itens) — só carrega para admin.
+  useEffect(() => {
+    if (isSpaceAdmin && space) api.spaces.links(space.id).then(setLinkedSpaces).catch(() => void 0);
+  }, [isSpaceAdmin, space]);
+
   const valueMap = useMemo(() => {
     const m = new Map<string, ItemFieldValue>();
     values.forEach((v) => m.set(v.field_def_id, v));
@@ -90,11 +109,24 @@ export function ItemDetail({
   if (!space) return null;
 
   // ── Mutations ───────────────────────────────────────────────────────────
+  /**
+   * Atualiza a tela na hora e grava em seguida. Se a gravação falhar,
+   * **desfaz** a mudança otimista — senão a tela mostra um estado que o
+   * banco não tem (foi o que aconteceu quando `done_at` ainda não existia:
+   * o botão ficava verde e nada era gravado).
+   */
   async function patch(p: Partial<Item>) {
     if (!item) return;
+    const previous = item;
     setItem({ ...item, ...p });
-    await api.items.update(item.id, p);
-    onChanged();
+    try {
+      await api.items.update(item.id, p);
+      onChanged();
+    } catch (e) {
+      setItem(previous);
+      console.error('[item] não consegui gravar a alteração', e);
+      alert(t('item.saveFailed'));
+    }
   }
 
   async function toggleAssignee(uid: string) {
@@ -232,6 +264,18 @@ export function ItemDetail({
   // Uma seção aparece se já tem conteúdo OU foi adicionada pelo menu "+ Adicionar".
   const has = (v: number) => v > 0;
   const show = {
+    client: !!item && (!!item.organization_id || !!item.contact_id || revealed.has('client')),
+    schedule:
+      !!item &&
+      // Cards cujo cronograma mora só nas tarefas internas (template,
+      // duplicata, importação) não têm os campos avulsos preenchidos —
+      // por isso as tarefas também contam para revelar a seção.
+      (has((item.schedule_tasks ?? []).length) ||
+        !!item.start_at ||
+        item.progress != null ||
+        item.work_hours != null ||
+        item.cost != null ||
+        revealed.has('schedule')),
     members: !!item && (has((item.assignees ?? []).length) || revealed.has('members')),
     dates: !!item && (!!item.due_at || revealed.has('dates')),
     fields: fieldDefs.length > 0 || revealed.has('field'),
@@ -282,11 +326,51 @@ export function ItemDetail({
             onBlur={(e) => e.target.value.trim() && e.target.value !== item.title && patch({ title: e.target.value.trim() })}
           />
 
+          {/* Concluir: deixa o card verde e cala o aviso de prazo, mesmo vencido */}
+          {canEdit && (
+            <button
+              className={cn(
+                'flex w-full items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition sm:w-auto',
+                item.done_at
+                  ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/15 dark:text-emerald-400'
+                  : 'border-line/15 text-ink-soft hover:border-emerald-500/40 hover:text-emerald-600',
+              )}
+              title={item.done_at ? t('item.reopenHint') : t('item.doneHint')}
+              onClick={() => patch({ done_at: item.done_at ? null : new Date().toISOString() })}
+            >
+              {item.done_at ? <CheckCircle2 size={16} /> : <Circle size={16} />}
+              {item.done_at
+                ? `${t('item.doneOn')} ${new Date(item.done_at).toLocaleDateString(locale)}`
+                : t('item.markDone')}
+            </button>
+          )}
+
           {/* + Adicionar */}
           {canEdit && (
             <div className="flex">
               <AddToCardMenu canManageFields={canManageFields} onSelect={onAdd} />
             </div>
+          )}
+
+          {/* Mover/copiar para Espaço interligado — só Administrador, e só se houver Espaços interligados */}
+          {isSpaceAdmin && linkedSpaces.length > 0 && (
+            <button className="btn-secondary w-full sm:w-auto" onClick={() => setMoveOpen(true)}>
+              <ArrowRightLeft size={15} /> {t('item.moveToSpace')}
+            </button>
+          )}
+
+          {/* Cliente (CRM): organização e pessoa de contato vindas dos cadastros */}
+          {show.client && (
+            <Section id="sec-client" icon={<Building2 size={13} />} title={t('crm.section')}>
+              <ClientSection
+                spaceId={space.id}
+                userId={user?.id ?? ''}
+                organizationId={item.organization_id ?? null}
+                contactId={item.contact_id ?? null}
+                canEdit={canEdit}
+                onChange={(p) => patch(p)}
+              />
+            </Section>
           )}
 
           {/* Description */}
@@ -298,6 +382,22 @@ export function ItemDetail({
               placeholder={t('item.titlePlaceholder')}
               onBlur={(e) => e.target.value !== item.description && patch({ description: e.target.value })}
             />
+            {extractUrls(item.description).length > 0 && (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {extractUrls(item.description).map((url) => (
+                  <a
+                    key={url}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex max-w-full items-center gap-1.5 rounded-lg bg-brand-indigo/10 px-2.5 py-1 text-xs font-medium text-brand-indigo transition hover:bg-brand-indigo/20"
+                  >
+                    <ExternalLink size={12} className="shrink-0" />
+                    <span className="truncate">{url.replace(/^https?:\/\//, '')}</span>
+                  </a>
+                ))}
+              </div>
+            )}
           </Section>
 
           {/* Etiquetas — sempre visível (acesso direto, fora do menu + Adicionar) */}
@@ -319,6 +419,17 @@ export function ItemDetail({
                 selectedIds={(item.assignees ?? []).map((a) => a.id)}
                 disabled={!canEdit}
                 onToggle={toggleAssignee}
+              />
+            </Section>
+          )}
+
+          {show.schedule && (
+            <Section id="sec-schedule" icon={<CalendarRange size={13} />} title={t('schedule.section')}>
+              <ScheduleSection
+                item={item}
+                canEdit={canEdit}
+                userId={user?.id ?? ''}
+                onChange={(p) => patch(p)}
               />
             </Section>
           )}
@@ -416,6 +527,202 @@ export function ItemDetail({
           </Section>
         </div>
       )}
+      {moveOpen && item && user && (
+        <MoveCopyDialog
+          item={item}
+          linkedSpaces={linkedSpaces}
+          createdBy={user.id}
+          keepDefault={space?.keep_on_migrate ?? true}
+          onClose={() => setMoveOpen(false)}
+          onDone={(mode) => {
+            setMoveOpen(false);
+            onChanged();
+            if (mode === 'move') onClose();
+          }}
+        />
+      )}
     </SidePanel>
+  );
+}
+
+function MoveCopyDialog({
+  item,
+  linkedSpaces,
+  createdBy,
+  keepDefault,
+  onClose,
+  onDone,
+}: {
+  item: Item;
+  linkedSpaces: Space[];
+  createdBy: string;
+  /** Padrão do Espaço para "manter o card aqui". */
+  keepDefault: boolean;
+  onClose: () => void;
+  onDone: (mode: 'copy' | 'move') => void;
+}) {
+  const { t } = useTranslation();
+  const [spaceId, setSpaceId] = useState('');
+  const [boards, setBoards] = useState<Board[]>([]);
+  const [boardId, setBoardId] = useState('');
+  const [columns, setColumns] = useState<Column[]>([]);
+  const [columnId, setColumnId] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  /**
+   * Manter o card no Espaço de origem. Vem do padrão do Espaço porque
+   * tirar o card daqui mexe nos relatórios e no histórico — mas dá para
+   * mudar na hora.
+   */
+  const [keep, setKeep] = useState(keepDefault);
+
+  useEffect(() => {
+    if (!spaceId) {
+      setBoards([]);
+      setBoardId('');
+      return;
+    }
+    api.boards
+      .list(spaceId)
+      .then((bs) => {
+        setBoards(bs);
+        setBoardId(bs[0]?.id ?? '');
+      })
+      .catch(() => setBoards([]));
+  }, [spaceId]);
+
+  useEffect(() => {
+    if (!boardId) {
+      setColumns([]);
+      setColumnId('');
+      return;
+    }
+    api.columns
+      .list(boardId)
+      .then((cs) => {
+        setColumns(cs);
+        setColumnId(cs[0]?.id ?? '');
+      })
+      .catch(() => setColumns([]));
+  }, [boardId]);
+
+  async function run(mode: 'copy' | 'move') {
+    if (!columnId) return;
+    setBusy(true);
+    setError('');
+    try {
+      const input = { sourceId: item.id, targetSpaceId: spaceId, targetColumnId: columnId, createdBy };
+      if (mode === 'copy') await api.items.copyToSpace(input);
+      else await api.items.moveToSpace(input);
+      onDone(mode);
+    } catch {
+      setError(t('errors.permission'));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const ready = !!spaceId && !!boardId && !!columnId && !busy;
+
+  return (
+    <Modal
+      open
+      onClose={onClose}
+      title={t('item.moveCopyTitle')}
+      width={430}
+      footer={
+        <>
+          <button className="btn-secondary" onClick={onClose}>
+            {t('common.cancel')}
+          </button>
+          <button className="btn-primary" onClick={() => run(keep ? 'copy' : 'move')} disabled={!ready}>
+            {busy ? <Spinner /> : keep ? <Copy size={15} /> : <ArrowRightLeft size={15} />}{' '}
+            {t('item.migrateAction')}
+          </button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <p className="text-sm text-ink-soft">{t('item.moveCopyHint')}</p>
+        <div>
+          <label className="label">{t('item.targetSpace')}</label>
+          <select className="field mt-1" value={spaceId} onChange={(e) => setSpaceId(e.target.value)}>
+            <option value="">—</option>
+            {linkedSpaces.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        {spaceId && (
+          <div>
+            <label className="label">{t('item.targetBoard')}</label>
+            {boards.length > 0 ? (
+              <select className="field mt-1" value={boardId} onChange={(e) => setBoardId(e.target.value)}>
+                {boards.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.name}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <p className="mt-1 text-xs text-ink-faint">{t('item.targetEmpty')}</p>
+            )}
+          </div>
+        )}
+        {boardId && columns.length > 0 && (
+          <div>
+            <label className="label">{t('item.targetColumn')}</label>
+            <select className="field mt-1" value={columnId} onChange={(e) => setColumnId(e.target.value)}>
+              {columns.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.title}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+        {/* O que acontece com o card AQUI — a escolha que mexe no histórico */}
+        <fieldset className="rounded-xl border border-line/15 p-3">
+          <legend className="label px-1">{t('item.originTitle')}</legend>
+          <div className="space-y-2">
+            {[true, false].map((value) => (
+              <label
+                key={String(value)}
+                className={cn(
+                  'flex cursor-pointer gap-2.5 rounded-lg border p-2.5 transition',
+                  keep === value
+                    ? 'border-brand-indigo/50 bg-brand-indigo/5'
+                    : 'border-transparent hover:bg-line/5',
+                )}
+              >
+                <input
+                  type="radio"
+                  name="migrate-origin"
+                  className="mt-0.5 accent-brand-indigo"
+                  checked={keep === value}
+                  onChange={() => setKeep(value)}
+                />
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold">
+                    {value ? t('item.keepHere') : t('item.removeHere')}
+                  </span>
+                  <span className="block text-[11px] leading-snug text-ink-soft">
+                    {value ? t('item.keepHereHint') : t('item.removeHereHint')}
+                  </span>
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <div className="flex gap-2 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs text-amber-600 dark:text-amber-400">
+          <span>ℹ️</span>
+          <span>{t('item.moveCopyNote')}</span>
+        </div>
+        {error && <p className="text-sm text-red-500">{error}</p>}
+      </div>
+    </Modal>
   );
 }

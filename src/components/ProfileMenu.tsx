@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { LogOut, User as UserIcon, Crown } from 'lucide-react';
+import { LogOut, User as UserIcon, Crown, BookOpen } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { APP_URL } from '@/lib/supabase';
 import { Avatar } from './Avatar';
 import { ThemeToggle } from './ThemeToggle';
 import { LanguageSwitcher } from './LanguageSwitcher';
@@ -68,6 +69,15 @@ export function ProfileMenu() {
             >
               <UserIcon size={16} /> {t('nav.profile')}
             </Link>
+            <a
+              href={`${APP_URL}/manual.html`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-line/5"
+              onClick={() => setOpen(false)}
+            >
+              <BookOpen size={16} /> {t('nav.manual')}
+            </a>
             <div className="flex items-center justify-between px-3 py-2">
               <LanguageSwitcher />
               <ThemeToggle />

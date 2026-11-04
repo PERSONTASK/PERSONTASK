@@ -1,9 +1,10 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useTranslation } from 'react-i18next';
-import { Paperclip, MessageSquare, CalendarClock, CheckSquare, Square } from 'lucide-react';
+import { Building2, Paperclip, MessageSquare, CalendarClock, CheckCircle2, CheckSquare, Square } from 'lucide-react';
 import type { CustomFieldDef, Item } from '@/types';
 import { Avatar } from '@/components/Avatar';
+import { useSpace } from '@/contexts/SpaceContext';
 import { cn, dueTone, formatDate } from '@/lib/utils';
 import { formatFieldValue } from './fieldDisplay';
 import { checklistPct } from './ChecklistsEditor';
@@ -29,6 +30,7 @@ export function ItemCard({
   onOpen: () => void;
 }) {
   const { t } = useTranslation();
+  const { space } = useSpace();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: item.id,
     data: { type: 'item', columnId: item.column_id },
@@ -73,6 +75,20 @@ export function ItemCard({
 
       <p className="text-sm font-semibold leading-snug text-ink">{item.title}</p>
 
+      {item.done_at && (
+        <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-emerald-500/12 px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+          <CheckCircle2 size={11} /> {t('item.done')}
+        </span>
+      )}
+
+      {/* Cliente (Organização vinculada) direto na face do card. */}
+      {item.organization?.name && (
+        <p className="mt-1 flex items-center gap-1 text-[11px] font-medium text-ink-soft">
+          <Building2 size={12} className="shrink-0 text-ink-faint" />
+          <span className="truncate">{item.organization.name}</span>
+        </p>
+      )}
+
       {item.description && (
         <p className="mt-1 line-clamp-2 text-xs text-ink-soft">{item.description}</p>
       )}
@@ -92,7 +108,7 @@ export function ItemCard({
             ) : (
               <div key={def.id} className="flex gap-1 text-[11px]">
                 <span className="font-medium text-ink-faint">{def.name}:</span>
-                <span className="text-ink-soft">{formatFieldValue(def, fv, locale)}</span>
+                <span className="text-ink-soft">{formatFieldValue(def, fv, locale, space?.currency)}</span>
               </div>
             ),
           )}

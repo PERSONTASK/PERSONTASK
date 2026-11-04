@@ -1,0 +1,23 @@
+IMAGENS DA PÁGINA DE ABERTURA
+=============================
+
+Coloque aqui quatro capturas de tela do app, com estes nomes exatos:
+
+  quadro.png       → a visão Quadro, com cards coloridos e etiquetas
+  cronograma.png   → o cronograma do projeto, aba Tabela
+  cronograma2.png  → o mesmo cronograma na aba Gantt
+  relatorio.png    → a visão Relatório, aba Funil
+
+ATENÇÃO ao nome: sem acento e sem maiúsculas. "relatório.png" com
+acento quebra o endereço da imagem em alguns servidores.
+
+Dicas para a captura ficar boa:
+  • Use o navegador em tela cheia (F11) e capture só a área do app.
+  • Proporção ideal 16:9 — por exemplo 1600 x 900 px.
+  • Prefira dados de exemplo a dados reais de cliente.
+  • Antes de capturar, saia do modo tela cheia e espere o aviso do
+    navegador sumir — ele aparece na imagem.
+  • PNG, até ~400 KB cada (acima disso a página fica lenta).
+
+Enquanto o arquivo não existir, a página mostra um painel colorido
+com "Imagem em breve" no lugar — nada quebra.

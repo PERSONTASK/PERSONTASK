@@ -1,8 +1,15 @@
 import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Calendar, CheckSquare, Users, Paperclip, Box } from 'lucide-react';
+import { Plus, Calendar, CalendarRange, CheckSquare, Users, Paperclip, Box, Building2 } from 'lucide-react';
 
-export type AddOption = 'dates' | 'checklist' | 'members' | 'attachment' | 'field';
+export type AddOption =
+  | 'dates'
+  | 'checklist'
+  | 'members'
+  | 'attachment'
+  | 'field'
+  | 'client'
+  | 'schedule';
 
 export function AddToCardMenu({
   canManageFields,
@@ -15,6 +22,8 @@ export function AddToCardMenu({
   const [open, setOpen] = useState(false);
 
   const opts: { key: AddOption; icon: ReactNode; label: string; desc: string; show?: boolean }[] = [
+    { key: 'client', icon: <Building2 size={16} />, label: t('crm.section'), desc: t('crm.sectionDesc') },
+    { key: 'schedule', icon: <CalendarRange size={16} />, label: t('schedule.section'), desc: t('schedule.sectionDesc') },
     { key: 'dates', icon: <Calendar size={16} />, label: t('item.dueDate'), desc: t('add.datesDesc') },
     { key: 'checklist', icon: <CheckSquare size={16} />, label: t('checklist.title'), desc: t('add.checklistDesc') },
     { key: 'members', icon: <Users size={16} />, label: t('item.assignees'), desc: t('add.membersDesc') },

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CheckCircle2, Users, Bell } from 'lucide-react';
+import { LayoutGrid, CalendarClock, ListChecks, Users, Globe, Sparkles, type LucideIcon } from 'lucide-react';
 import { Logo } from '@/components/Logo';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
@@ -15,6 +15,13 @@ export function AuthLayout({
   children: ReactNode;
 }) {
   const { t } = useTranslation();
+  const features: { icon: LucideIcon; label: string }[] = [
+    { icon: LayoutGrid, label: t('promo.f1') },
+    { icon: CalendarClock, label: t('promo.f2') },
+    { icon: ListChecks, label: t('promo.f3') },
+    { icon: Users, label: t('promo.f4') },
+    { icon: Globe, label: t('promo.f5') },
+  ];
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       {/* Brand panel */}
@@ -22,20 +29,25 @@ export function AuthLayout({
         <div className="absolute -right-24 -top-24 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
         <div className="absolute -bottom-32 -left-16 h-96 w-96 rounded-full bg-black/10 blur-3xl" />
         <Logo forceVariant="onDark" className="relative h-9" />
-        <div className="relative space-y-6">
-          <h2 className="max-w-sm text-3xl font-extrabold leading-tight text-balance">
-            {t('common.tagline')}
-          </h2>
-          <ul className="space-y-3 text-white/90">
-            <li className="flex items-center gap-3">
-              <Users size={20} /> {t('members.title')}
-            </li>
-            <li className="flex items-center gap-3">
-              <CheckCircle2 size={20} /> {t('nav.overview')}
-            </li>
-            <li className="flex items-center gap-3">
-              <Bell size={20} /> {t('profile.emailNotifications')}
-            </li>
+        <div className="relative space-y-7">
+          <div>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-bold uppercase tracking-wide ring-1 ring-white/25">
+              <Sparkles size={13} /> {t('promo.cta')}
+            </span>
+            <h2 className="mt-4 max-w-sm text-3xl font-extrabold leading-tight text-balance">
+              {t('common.tagline')}
+            </h2>
+            <p className="mt-2 max-w-sm text-white/80">{t('promo.sub')}</p>
+          </div>
+          <ul className="space-y-3.5">
+            {features.map((f, i) => (
+              <li key={i} className="flex items-center gap-3">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/15 ring-1 ring-white/20">
+                  <f.icon size={16} />
+                </span>
+                <span className="max-w-xs text-sm text-white/95">{f.label}</span>
+              </li>
+            ))}
           </ul>
         </div>
         <p className="relative text-sm text-white/70">© {new Date().getFullYear()} PERSONTASK</p>

@@ -58,6 +58,12 @@ export function FieldsManager({
     await onChanged();
   }
 
+  /** Campo numérico passa a ser exibido como dinheiro, na moeda do Espaço. */
+  async function toggleMoney(def: CustomFieldDef) {
+    await api.fields.updateDef(def.id, { config: { ...def.config, money: !def.config.money } });
+    await onChanged();
+  }
+
   return (
     <div className="space-y-3">
       {fieldDefs.map((def) => (
@@ -67,6 +73,17 @@ export function FieldsManager({
             <span className="rounded-full bg-brand-indigo/10 px-2 py-0.5 text-[10px] font-bold text-brand-indigo">
               {t(`fields.${def.type}`)}
             </span>
+            {def.type === 'number' && (
+              <label className="flex items-center gap-1 text-[11px] text-ink-soft" title={t('fields.moneyHint')}>
+                <input
+                  type="checkbox"
+                  className="accent-brand-indigo"
+                  checked={!!def.config.money}
+                  onChange={() => toggleMoney(def)}
+                />
+                {t('fields.money')}
+              </label>
+            )}
             <label className="flex items-center gap-1 text-[11px] text-ink-soft">
               <input
                 type="checkbox"

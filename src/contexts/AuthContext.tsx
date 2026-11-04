@@ -20,6 +20,8 @@ interface AuthCtx {
   signInWithPassword: (email: string, password: string) => Promise<void>;
   signUpWithPassword: (name: string, email: string, password: string) => Promise<{ needsConfirm: boolean }>;
   signInWithGoogle: (redirectPath?: string) => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+  updatePassword: (password: string) => Promise<void>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
   updateProfile: (patch: Partial<Profile>) => Promise<void>;
@@ -83,6 +85,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error;
   }, []);
 
+  // Envia o e-mail de redefinição de senha (link volta para /reset-password).
+  const resetPassword = useCallback(async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${APP_URL}/reset-password`,
+    });
+    if (error) throw error;
+  }, []);
+
+  // Define a nova senha (usa a sessão de recuperação criada pelo link do e-mail).
+  const updatePassword = useCallback(async (password: string) => {
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) throw error;
+  }, []);
+
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
     setProfile(null);
@@ -112,6 +128,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signInWithPassword,
       signUpWithPassword,
       signInWithGoogle,
+      resetPassword,
+      updatePassword,
       signOut,
       refreshProfile,
       updateProfile,
@@ -123,6 +141,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signInWithPassword,
       signUpWithPassword,
       signInWithGoogle,
+      resetPassword,
+      updatePassword,
       signOut,
       refreshProfile,
       updateProfile,

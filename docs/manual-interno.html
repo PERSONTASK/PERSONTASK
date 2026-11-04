@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PERSONTASK — Manual Interno (Guia do Dono)</title>
+<meta name="robots" content="noindex, nofollow" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --blue:#3B82F6; --indigo:#6366F1; --violet:#8B5CF6;
+    --grad:linear-gradient(135deg,#3B82F6 0%,#6366F1 50%,#8B5CF6 100%);
+    --bg:#f6f7fb; --card:#fff; --ink:#14152a; --ink-soft:#4a4c66; --ink-faint:#8a8ca6;
+    --line:#e6e7f0; --line-soft:#eef0f7; --shadow:0 10px 40px rgba(20,21,42,.07); --shadow-sm:0 4px 16px rgba(20,21,42,.06);
+    --code-bg:#f2f3fa; --amber:#f59e0b; --red:#ef4444; --green:#10b981;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0c0d18; --card:#14162a; --ink:#eceef8; --ink-soft:#b6b9d4; --ink-faint:#7d80a0;
+      --line:#262a45; --line-soft:#1d2038; --shadow:0 10px 40px rgba(0,0,0,.45); --shadow-sm:0 4px 16px rgba(0,0,0,.35); --code-bg:#1b1e36; }
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html { scroll-behavior:smooth; scroll-padding-top:20px; }
+  body { font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--ink); line-height:1.65; -webkit-font-smoothing:antialiased; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  h1,h2,h3,.brand { font-family:'Poppins','Inter',sans-serif; }
+  code, .mono { font-family:'JetBrains Mono',ui-monospace,Consolas,monospace; font-size:.9em; background:var(--code-bg); padding:1px 6px; border-radius:5px; }
+  pre { font-family:'JetBrains Mono',ui-monospace,Consolas,monospace; background:var(--code-bg); border:1px solid var(--line); border-radius:10px; padding:14px 16px; overflow-x:auto; font-size:13px; line-height:1.55; margin:12px 0; }
+
+  .hero { position:relative; overflow:hidden; background:var(--grad); color:#fff; padding:56px 24px 72px; text-align:center; }
+  .hero::after { content:""; position:absolute; inset:0; background:radial-gradient(1000px 340px at 50% -10%,rgba(255,255,255,.26),transparent 70%); }
+  .hero-in { max-width:820px; margin:0 auto; position:relative; z-index:1; }
+  .badge { display:inline-flex; align-items:center; gap:7px; font-weight:700; font-size:11.5px; letter-spacing:1.4px; text-transform:uppercase; background:rgba(255,255,255,.16); padding:6px 14px; border-radius:999px; ring:1px solid rgba(255,255,255,.3); margin-bottom:18px; }
+  .hero h1 { font-size:clamp(26px,5vw,42px); font-weight:800; line-height:1.1; letter-spacing:-.5px; }
+  .hero p { font-size:clamp(14px,2.2vw,17px); opacity:.95; margin:14px auto 0; max-width:640px; }
+  .brandmark { font-weight:800; font-size:15px; letter-spacing:.5px; margin-bottom:22px; opacity:.95; }
+
+  .wrap { max-width:1120px; margin:-44px auto 0; padding:0 22px 80px; position:relative; z-index:2; display:grid; grid-template-columns:250px 1fr; gap:32px; align-items:start; }
+  nav.toc { position:sticky; top:18px; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px; box-shadow:var(--shadow-sm); max-height:calc(100vh - 40px); overflow:auto; }
+  nav.toc h4 { font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--ink-faint); margin:6px 8px 10px; }
+  nav.toc a { display:flex; gap:9px; align-items:baseline; padding:7px 10px; border-radius:9px; text-decoration:none; color:var(--ink-soft); font-size:13px; font-weight:500; transition:background .12s,color .12s; }
+  nav.toc a:hover { background:var(--line-soft); color:var(--ink); }
+  nav.toc a .n { font-size:11.5px; font-weight:700; color:var(--indigo); width:18px; flex:none; text-align:right; }
+  main { min-width:0; }
+
+  section.doc { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:28px 30px; margin-bottom:20px; box-shadow:var(--shadow-sm); }
+  .sec-head { display:flex; align-items:center; gap:13px; margin-bottom:6px; }
+  .sec-num { flex:none; width:38px; height:38px; border-radius:11px; background:var(--grad); color:#fff; font-family:'Poppins'; font-weight:800; font-size:17px; display:grid; place-items:center; box-shadow:0 6px 16px rgba(99,102,241,.3); }
+  section.doc h2 { font-size:22px; font-weight:700; letter-spacing:-.3px; }
+  section.doc h3 { font-size:15.5px; font-weight:700; margin:20px 0 7px; }
+  section.doc p { color:var(--ink-soft); margin:9px 0; }
+  section.doc strong { color:var(--ink); font-weight:600; }
+
+  ul.clean, ol.num { margin:10px 0 10px 2px; display:grid; gap:8px; }
+  ul.clean { list-style:none; }
+  ul.clean li { position:relative; padding-left:24px; color:var(--ink-soft); }
+  ul.clean li::before { content:"▸"; position:absolute; left:2px; top:0; color:var(--indigo); font-weight:800; }
+  ol.num { padding-left:22px; color:var(--ink-soft); }
+  ol.num li { padding-left:4px; }
+  ol.num li::marker { color:var(--indigo); font-weight:700; }
+
+  .tbl-wrap { overflow-x:auto; margin:14px 0; border:1px solid var(--line); border-radius:12px; }
+  table { width:100%; border-collapse:collapse; font-size:13.5px; min-width:520px; }
+  th,td { text-align:left; padding:10px 13px; border-bottom:1px solid var(--line); vertical-align:top; }
+  thead th { background:var(--line-soft); color:var(--ink); font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:.4px; }
+  tbody tr:last-child td { border-bottom:none; }
+  td code { white-space:nowrap; }
+
+  .note { display:flex; gap:11px; padding:13px 15px; border-radius:12px; margin:14px 0; font-size:13.5px; }
+  .note .ic { font-size:17px; flex:none; line-height:1.4; }
+  .note p { margin:0; color:var(--ink-soft); }
+  .note.tip { background:color-mix(in srgb,var(--indigo) 10%,var(--card)); border:1px solid color-mix(in srgb,var(--indigo) 26%,var(--line)); }
+  .note.warn { background:color-mix(in srgb,var(--amber) 12%,var(--card)); border:1px solid color-mix(in srgb,var(--amber) 32%,var(--line)); }
+  .note.danger { background:color-mix(in srgb,var(--red) 10%,var(--card)); border:1px solid color-mix(in srgb,var(--red) 30%,var(--line)); }
+
+  /* architecture diagram */
+  .arch { display:flex; flex-wrap:wrap; align-items:stretch; gap:10px; margin:16px 0; }
+  .arch .box { flex:1 1 150px; border:1px solid var(--line); border-radius:12px; padding:13px 14px; background:var(--bg); }
+  .arch .box .tag { font-size:10.5px; text-transform:uppercase; letter-spacing:.6px; font-weight:700; color:var(--indigo); }
+  .arch .box b { display:block; margin:3px 0 2px; font-size:14px; color:var(--ink); }
+  .arch .box span { font-size:12px; color:var(--ink-soft); }
+
+  .kbd { font-family:'JetBrains Mono',monospace; font-size:12px; background:var(--code-bg); border:1px solid var(--line); border-bottom-width:2px; border-radius:6px; padding:1px 6px; }
+  footer.foot { text-align:center; padding:34px 22px 60px; color:var(--ink-faint); font-size:13px; }
+  .foot-mark { font-family:'Poppins'; font-weight:800; font-size:16px; color:var(--ink); margin-bottom:5px; }
+  .foot-mark span { background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
+
+  @media (max-width:900px) {
+    .wrap { grid-template-columns:1fr; }
+    nav.toc { position:static; order:-1; max-height:none; }
+    nav.toc .toc-links { display:grid; grid-template-columns:1fr 1fr; gap:1px; }
+    section.doc { padding:22px 18px; }
+  }
+  @media print {
+    @page { size:A4; margin:12mm; }
+    nav.toc, .noprint { display:none !important; }
+    .wrap { display:block; margin:0; padding:0; }
+    section.doc { box-shadow:none; break-inside:avoid; border-radius:0; border:none; border-bottom:1px solid var(--line); margin:0; }
+    .hero { padding:30px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-in">
+    <div class="brandmark">PERSON·TASK</div>
+    <span class="badge">🔒 Documento interno · confidencial</span>
+    <h1>Manual de Operações Interno</h1>
+    <p>O guia do dono: como o PERSONTASK é montado, como publicar novas versões, gerenciar planos, e-mails, domínio e resolver problemas. <strong>Não publique este arquivo</strong> — é só para uso administrativo.</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <nav class="toc">
+    <h4>Conteúdo</h4>
+    <div class="toc-links">
+      <a href="#s1"><span class="n">1</span> Arquitetura</a>
+      <a href="#s2"><span class="n">2</span> Painéis de admin</a>
+      <a href="#s3"><span class="n">3</span> Publicar (deploy)</a>
+      <a href="#s4"><span class="n">4</span> Planos Free/Premium</a>
+      <a href="#s5"><span class="n">5</span> E-mails</a>
+      <a href="#s6"><span class="n">6</span> Domínio &amp; DNS</a>
+      <a href="#s7"><span class="n">7</span> Autenticação</a>
+      <a href="#s8"><span class="n">8</span> Banco &amp; segurança</a>
+      <a href="#s9"><span class="n">9</span> Functions &amp; Cron</a>
+      <a href="#s10"><span class="n">10</span> Playbook</a>
+      <a href="#s11"><span class="n">11</span> Problemas</a>
+      <a href="#s12"><span class="n">12</span> Custos</a>
+      <a href="#s13"><span class="n">13</span> Segredos</a>
+    </div>
+  </nav>
+
+  <main>
+
+    <section class="doc" id="s1">
+      <div class="sec-head"><div class="sec-num">1</div><h2>Arquitetura — as peças</h2></div>
+      <p>O PERSONTASK é um app <strong>web (React)</strong> hospedado como site estático, que fala com o <strong>Supabase</strong> (banco, login, arquivos, funções) e envia e-mails pelo <strong>Resend</strong>. O domínio próprio aponta para a hospedagem.</p>
+      <div class="arch">
+        <div class="box"><span class="tag">Frontend</span><b>React + Vite</b><span>Interface (PT/EN/ES), PWA. Hospedado no Netlify.</span></div>
+        <div class="box"><span class="tag">Backend</span><b>Supabase</b><span>Postgres + Auth + Storage + RLS + Edge Functions.</span></div>
+        <div class="box"><span class="tag">E-mails</span><b>Resend</b><span>Avisos do app (API) e e-mails do Auth (SMTP).</span></div>
+        <div class="box"><span class="tag">Domínio</span><b>Locaweb → Netlify</b><span>persontask.com.br (DNS na Locaweb, HTTPS pelo Netlify).</span></div>
+      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Camada</th><th>Tecnologia</th><th>Observação</th></tr></thead>
+        <tbody>
+          <tr><td>Interface</td><td>React + TypeScript + Vite + Tailwind</td><td>Código em <code>persontask-app/src</code></td></tr>
+          <tr><td>Hospedagem</td><td>Netlify</td><td>Site <code>persontask</code> · deploy por arrastar a pasta <code>dist</code></td></tr>
+          <tr><td>Banco / Login / Arquivos</td><td>Supabase (ref <code>wogilvheyciprqqkprol</code>)</td><td>Postgres com RLS por Espaço</td></tr>
+          <tr><td>E-mails transacionais</td><td>Resend (domínio verificado)</td><td>Remetente <code>no-reply@persontask.com.br</code></td></tr>
+          <tr><td>Código-fonte</td><td>GitHub <code>PERSONTASK/PERSONTASK</code> (privado)</td><td>Branch <code>main</code></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section class="doc" id="s2">
+      <div class="sec-head"><div class="sec-num">2</div><h2>Painéis de administração (onde mexer)</h2></div>
+      <p>Você administra tudo por estes painéis. Guarde os logins com segurança (idealmente num gerenciador de senhas).</p>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Serviço</th><th>Para quê</th><th>Onde</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Netlify</strong></td><td>Publicar o site, domínio, HTTPS</td><td>app.netlify.com → site <code>persontask</code></td></tr>
+          <tr><td><strong>Supabase</strong></td><td>Banco, usuários, login, funções, logs, planos</td><td>supabase.com/dashboard</td></tr>
+          <tr><td><strong>Resend</strong></td><td>Envio de e-mails, logs de entrega, domínio, API keys</td><td>resend.com</td></tr>
+          <tr><td><strong>Locaweb</strong></td><td>Domínio e DNS (registros)</td><td>painel.locaweb.com.br</td></tr>
+          <tr><td><strong>Google Cloud</strong></td><td>Credenciais do login com Google (OAuth)</td><td>console.cloud.google.com</td></tr>
+          <tr><td><strong>GitHub</strong></td><td>Código-fonte (backup e versões)</td><td>github.com/PERSONTASK/PERSONTASK</td></tr>
+          <tr><td><strong>Gmail</strong></td><td>Caixa de contato humana</td><td>contato.persontask@gmail.com</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section class="doc" id="s3">
+      <div class="sec-head"><div class="sec-num">3</div><h2>Publicar uma nova versão (deploy)</h2></div>
+      <p>O deploy é <strong>manual</strong> (arrastar a pasta). Sempre que o código mudar, gere a build e envie ao Netlify.</p>
+      <h3>1. Gerar a build</h3>
+      <p>Abra o terminal (Git Bash) na pasta do app e rode:</p>
+      <pre>export PATH="/c/Program Files/nodejs:$PATH"   # deixa o Node acessível
+cd /c/Users/User/persontask-app
+npm run build                                 # gera a pasta dist/</pre>
+      <p>Isso cria/atualiza a pasta <code>persontask-app/dist</code>.</p>
+      <h3>2. Enviar ao Netlify</h3>
+      <ol class="num">
+        <li>Acesse o Netlify → site <strong>persontask</strong> → aba <strong>Deploys</strong>.</li>
+        <li>Arraste a pasta <code>dist</code> inteira para a área de <em>drag &amp; drop</em>.</li>
+        <li>Espere aparecer <strong>Published</strong>.</li>
+        <li>No site, dê <span class="kbd">Ctrl</span>+<span class="kbd">F5</span> (o PWA atualiza sozinho no próximo acesso).</li>
+      </ol>
+      <div class="note tip"><span class="ic">✔️</span><p>Para conferir se a versão nova subiu <em>sem depender de cache</em>: o nome do arquivo JS muda a cada build (ex.: <code>assets/index-XXXX.js</code>). Se o arquivo no ar tem hash novo, publicou.</p></div>
+      <div class="note tip"><span class="ic">💡</span><p>O manual do usuário (<code>manual.html</code>) e o PDF ficam em <code>persontask-app/public</code> e vão junto na build. Este manual interno fica em <code>docs/</code> e <strong>não</strong> é publicado.</p></div>
+    </section>
+
+    <section class="doc" id="s4">
+      <div class="sec-head"><div class="sec-num">4</div><h2>Planos: Grátis e Premium</h2></div>
+      <p>Ainda <strong>não há cobrança automática</strong>. O plano de cada usuário fica no campo <code>plan</code> da tabela <code>profiles</code> (valores: <code>free</code> ou <code>premium</code>).</p>
+      <h3>Dar Premium a um cliente (manual)</h3>
+      <ol class="num">
+        <li>Supabase → <strong>Table Editor</strong> → tabela <code>profiles</code>.</li>
+        <li>Ache a linha do usuário (pela coluna <code>email</code>).</li>
+        <li>Mude <code>plan</code> de <code>free</code> para <code>premium</code> e salve.</li>
+        <li>O usuário vê os recursos Premium liberados no próximo carregamento.</li>
+      </ol>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Recurso</th><th>Grátis</th><th>Premium</th></tr></thead>
+        <tbody>
+          <tr><td>Espaços</td><td>1</td><td>Vários</td></tr>
+          <tr><td>Painéis por Espaço</td><td>1</td><td>Vários</td></tr>
+          <tr><td>Imagem de fundo, fonte, cor de coluna, logo</td><td>—</td><td>Sim</td></tr>
+          <tr><td>Espaços interligados</td><td>—</td><td>Sim</td></tr>
+        </tbody>
+      </table></div>
+      <div class="note tip"><span class="ic">💳</span><p>Quando quiser cobrança automática (Stripe/gateway), dá para plugar depois — o campo <code>plan</code> já é o "interruptor" que o app lê.</p></div>
+    </section>
+
+    <section class="doc" id="s5">
+      <div class="sec-head"><div class="sec-num">5</div><h2>E-mails</h2></div>
+      <p>Há <strong>dois caminhos</strong> de e-mail, os dois pelo Resend, do domínio verificado:</p>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Tipo</th><th>Como sai</th><th>Quais</th></tr></thead>
+        <tbody>
+          <tr><td>Avisos do app</td><td>Edge Functions → Resend <strong>API</strong></td><td>Item atribuído, vencimento (cron), menção, convite</td></tr>
+          <tr><td>E-mails de conta</td><td>Supabase Auth → Resend <strong>SMTP</strong></td><td>Reset de senha, confirmação, magic link, troca de e-mail</td></tr>
+        </tbody>
+      </table></div>
+      <h3>Configurações-chave</h3>
+      <ul class="clean">
+        <li><strong>Remetente:</strong> <code>no-reply@persontask.com.br</code>.</li>
+        <li><strong>SMTP (Supabase → Authentication → Emails → SMTP):</strong> host <code>smtp.resend.com</code>, porta <code>465</code>, usuário <code>resend</code> (minúsculo!), senha = <em>Resend API key</em>.</li>
+        <li><strong>Secrets das Functions (Supabase → Edge Functions → Secrets):</strong> <code>RESEND_API_KEY</code>, <code>EMAIL_FROM</code>, <code>APP_URL=https://persontask.com.br</code>.</li>
+        <li><strong>Templates PT:</strong> em <code>supabase/email-templates/</code> — colar em Authentication → Emails → Templates.</li>
+      </ul>
+      <h3>Ver se um e-mail saiu</h3>
+      <p>Abra <strong>Resend → Emails</strong>: cada envio aparece com status (<em>Delivered / Bounced</em>). Se não aparece nada, o e-mail não chegou ao Resend (config de SMTP ou a ação não disparou).</p>
+      <div class="note warn"><span class="ic">📬</span><p>Domínio novo pode cair no <strong>spam</strong> no começo. Está tudo autenticado (SPF/DKIM/DMARC PASS) — é só reputação. Marcar "não é spam" acelera o aquecimento.</p></div>
+    </section>
+
+    <section class="doc" id="s6">
+      <div class="sec-head"><div class="sec-num">6</div><h2>Domínio &amp; DNS (Locaweb)</h2></div>
+      <p>O domínio <code>persontask.com.br</code> foi registrado na Locaweb, e o DNS aponta para o Netlify e o Resend.</p>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Tipo</th><th>Nome</th><th>Valor</th><th>Para quê</th></tr></thead>
+        <tbody>
+          <tr><td>A</td><td><code>@</code></td><td><code>75.2.60.5</code></td><td>Site (Netlify)</td></tr>
+          <tr><td>CNAME</td><td><code>www</code></td><td><code>persontask.netlify.app</code></td><td>www → site</td></tr>
+          <tr><td>TXT</td><td><code>resend._domainkey</code></td><td>(chave DKIM)</td><td>Autenticação de e-mail</td></tr>
+          <tr><td>CNAME</td><td><code>rsend</code> / <code>send</code></td><td><code>*.forge.rmta.net</code></td><td>Envio (Resend/SPF)</td></tr>
+          <tr><td>TXT</td><td><code>_dmarc</code></td><td><code>v=DMARC1; p=none;</code></td><td>Política DMARC</td></tr>
+        </tbody>
+      </table></div>
+      <div class="note danger"><span class="ic">🚫</span><p><strong>Não mexa nos registros MX</strong> nem apague os de e-mail sem necessidade — é o que autentica seus envios. O HTTPS é renovado sozinho pelo Netlify.</p></div>
+    </section>
+
+    <section class="doc" id="s7">
+      <div class="sec-head"><div class="sec-num">7</div><h2>Autenticação (login)</h2></div>
+      <ul class="clean">
+        <li><strong>E-mail/senha</strong> e <strong>Google</strong> (OAuth) — ambos ativos.</li>
+        <li><strong>Google:</strong> credenciais no Google Cloud Console. Redirect autorizado: <code>https://wogilvheyciprqqkprol.supabase.co/auth/v1/callback</code>. No Supabase: Authentication → Providers → Google (Client ID + Secret).</li>
+        <li><strong>URLs (Supabase → Authentication → URL Configuration):</strong> Site URL <code>https://persontask.com.br</code>; Redirect <code>https://persontask.com.br/**</code>.</li>
+        <li><strong>Recuperar senha:</strong> rotas <code>/forgot-password</code> e <code>/reset-password</code> no app; e-mail via Resend SMTP.</li>
+      </ul>
+      <div class="note tip"><span class="ic">🔑</span><p>Se um usuário não consegue entrar: Supabase → Authentication → <strong>Users</strong> permite reenviar recuperação, confirmar e-mail manualmente ou remover o usuário.</p></div>
+    </section>
+
+    <section class="doc" id="s8">
+      <div class="sec-head"><div class="sec-num">8</div><h2>Banco de dados &amp; segurança</h2></div>
+      <ul class="clean">
+        <li><strong>Postgres no Supabase</strong> com <strong>RLS (Row Level Security)</strong> por Espaço — cada pessoa só enxerga os Espaços de que participa.</li>
+        <li><strong>Fonte da verdade do schema:</strong> <code>supabase/schema.sql</code> (idempotente). Para recriar/reparar: Supabase → <strong>SQL Editor</strong> → cole e rode.</li>
+        <li>Se uma criação de Espaço falhar com erro <code>42501</code>, rode o <code>schema.sql</code> de novo (recria as policies).</li>
+        <li><strong>Arquivos (anexos, avatares, fundos):</strong> Supabase Storage (buckets <code>attachments</code>, <code>avatars</code>, <code>space-backgrounds</code>).</li>
+      </ul>
+      <div class="note warn"><span class="ic">💾</span><p><strong>Backups:</strong> confira em Supabase → Database → Backups. No plano gratuito os backups são limitados — se o negócio crescer, o plano Pro traz backups diários e retenção maior.</p></div>
+    </section>
+
+    <section class="doc" id="s9">
+      <div class="sec-head"><div class="sec-num">9</div><h2>Edge Functions &amp; Cron</h2></div>
+      <p>As funções de e-mail rodam no Supabase (Deno). São 4:</p>
+      <ul class="clean">
+        <li><code>notify-item-assigned</code> — avisa quem virou responsável.</li>
+        <li><code>notify-mention</code> — avisa quem foi mencionado (@).</li>
+        <li><code>notify-due-soon</code> — avisa prazos próximos (roda por <strong>cron</strong>).</li>
+        <li><code>send-invite</code> — envia o convite para o Espaço.</li>
+      </ul>
+      <h3>Reimplantar (se editar uma função)</h3>
+      <pre>cd /c/Users/User/persontask-app
+npx supabase functions deploy notify-item-assigned notify-mention notify-due-soon send-invite \
+  --project-ref wogilvheyciprqqkprol --no-verify-jwt</pre>
+      <p>O <strong>cron</strong> do vencimento está em <code>supabase/cron.sql</code> (pg_cron + pg_net, ~11:00 UTC). Os <strong>secrets</strong> das funções ficam em Supabase → Edge Functions → Secrets.</p>
+      <div class="note tip"><span class="ic">🖥️</span><p>O login do Supabase CLI fica guardado no Windows — por isso o <code>deploy</code> das funções roda no <strong>seu</strong> terminal.</p></div>
+    </section>
+
+    <section class="doc" id="s10">
+      <div class="sec-head"><div class="sec-num">10</div><h2>Playbook — tarefas comuns</h2></div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Quero…</th><th>Como fazer</th></tr></thead>
+        <tbody>
+          <tr><td>Dar Premium a alguém</td><td>Supabase → Table Editor → <code>profiles</code> → <code>plan = premium</code></td></tr>
+          <tr><td>Publicar uma atualização</td><td><code>npm run build</code> → arrastar <code>dist</code> no Netlify (seção 3)</td></tr>
+          <tr><td>Ver por que um e-mail não chegou</td><td>Resend → Emails (status). Se vazio: Supabase → Logs → Auth</td></tr>
+          <tr><td>Reenviar recuperação de senha</td><td>Supabase → Authentication → Users → menu do usuário</td></tr>
+          <tr><td>Mudar o texto dos e-mails</td><td>Authentication → Emails → Templates (usar <code>supabase/email-templates/</code>)</td></tr>
+          <tr><td>Editar textos da interface</td><td><code>src/i18n/locales/{pt,en,es}.json</code> → rebuild → deploy</td></tr>
+          <tr><td>Trocar o remetente de e-mail</td><td>Secret <code>EMAIL_FROM</code> (Functions) e Sender no SMTP</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section class="doc" id="s11">
+      <div class="sec-head"><div class="sec-num">11</div><h2>Solução de problemas</h2></div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Sintoma</th><th>Causa provável / correção</th></tr></thead>
+        <tbody>
+          <tr><td>E-mail do Supabase não chega e nada aparece no Resend</td><td>SMTP: o <strong>Username</strong> tem que ser <code>resend</code> (minúsculo). Confira também a API key e a porta (465→587).</td></tr>
+          <tr><td>E-mail cai no spam</td><td>Reputação de domínio novo. Autenticação está OK — marque "não é spam"; melhora com o uso.</td></tr>
+          <tr><td>Criar Espaço dá erro 42501</td><td>Rode <code>supabase/schema.sql</code> de novo (recria as policies de RLS).</td></tr>
+          <tr><td>"Instalar app" não aparece</td><td>Ícones PWA precisam existir em <code>public/icons</code> (192/512 PNG) — rebuild + deploy.</td></tr>
+          <tr><td>Rota abre página em branco / 404 no Netlify</td><td>SPA: garantir <code>public/_redirects</code> (<code>/*  /index.html  200</code>).</td></tr>
+          <tr><td>Login Google dá "provider not enabled"</td><td>Ativar Google em Supabase → Providers e conferir o redirect no Google Cloud.</td></tr>
+          <tr><td>Fonte não muda (Premium)</td><td>A família precisa estar carregada no <code>index.html</code> (Google Fonts).</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section class="doc" id="s12">
+      <div class="sec-head"><div class="sec-num">12</div><h2>Custos &amp; limites</h2></div>
+      <p>Hoje tudo roda em planos <strong>gratuitos</strong> (fora o domínio). Ficar de olho nos limites conforme crescer:</p>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Serviço</th><th>Plano atual</th><th>Quando pensar em upgrade</th></tr></thead>
+        <tbody>
+          <tr><td>Netlify</td><td>Grátis</td><td>Muito tráfego/banda ou builds automáticos</td></tr>
+          <tr><td>Supabase</td><td>Grátis</td><td>Mais base de dados, backups diários, projeto sempre ativo (Pro)</td></tr>
+          <tr><td>Resend</td><td>Grátis</td><td>Acima do limite mensal de e-mails</td></tr>
+          <tr><td>Locaweb (domínio)</td><td>Pago (anual)</td><td>Renovação anual — não deixe expirar</td></tr>
+          <tr><td>Google OAuth</td><td>Grátis</td><td>—</td></tr>
+        </tbody>
+      </table></div>
+      <div class="note warn"><span class="ic">📅</span><p><strong>Renovação do domínio:</strong> anote a data na Locaweb. Se o domínio expirar, o site e os e-mails param.</p></div>
+    </section>
+
+    <section class="doc" id="s13">
+      <div class="sec-head"><div class="sec-num">13</div><h2>Segredos — onde ficam (nunca versionar)</h2></div>
+      <p>Estes valores são <strong>sensíveis</strong>. Guarde num gerenciador de senhas e <strong>nunca</strong> os coloque no GitHub.</p>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Segredo</th><th>Onde vive</th></tr></thead>
+        <tbody>
+          <tr><td>Resend API key</td><td>Resend → API Keys · usado nos secrets das Functions e no SMTP do Supabase</td></tr>
+          <tr><td>Supabase <em>service_role</em> key</td><td>Supabase → Project Settings → API (uso só server-side)</td></tr>
+          <tr><td>Google Client Secret</td><td>Google Cloud Console → Credentials</td></tr>
+          <tr><td>Chaves locais de build</td><td><code>persontask-app/.env</code> — é <strong>gitignored</strong>, não subir</td></tr>
+        </tbody>
+      </table></div>
+      <div class="note danger"><span class="ic">🔐</span><p>A chave <em>anon/publishable</em> do Supabase é pública (vai no app, tudo bem). Já a <em>service_role</em>, a API key do Resend e o Client Secret do Google são <strong>secretos</strong> — se vazarem, revogue e gere novos.</p></div>
+    </section>
+
+  </main>
+</div>
+
+<footer class="foot">
+  <div class="foot-mark">PERSON<span>TASK</span></div>
+  <p>Manual de Operações Interno · uso administrativo · © 2026 PERSONTASK</p>
+  <p style="margin-top:5px">Dúvidas de suporte: contato.persontask@gmail.com</p>
+</footer>
+
+</body>
+</html>

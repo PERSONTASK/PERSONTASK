@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Manual do PERSONTASK</title>
+<meta name="description" content="Manual de operações do PERSONTASK — tarefas e pessoas, por responsabilidade." />
+<link rel="icon" href="/favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --blue: #3B82F6;
+    --indigo: #6366F1;
+    --violet: #8B5CF6;
+    --grad: linear-gradient(135deg, #3B82F6 0%, #6366F1 50%, #8B5CF6 100%);
+    --bg: #f6f7fb;
+    --card: #ffffff;
+    --ink: #14152a;
+    --ink-soft: #4a4c66;
+    --ink-faint: #8a8ca6;
+    --line: #e6e7f0;
+    --line-soft: #eef0f7;
+    --shadow: 0 10px 40px rgba(20, 21, 42, .07);
+    --shadow-sm: 0 4px 16px rgba(20, 21, 42, .06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0c0d18;
+      --card: #14162a;
+      --ink: #eceef8;
+      --ink-soft: #b6b9d4;
+      --ink-faint: #7d80a0;
+      --line: #262a45;
+      --line-soft: #1d2038;
+      --shadow: 0 10px 40px rgba(0, 0, 0, .45);
+      --shadow-sm: 0 4px 16px rgba(0, 0, 0, .35);
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; scroll-padding-top: 84px; }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, .brand { font-family: 'Poppins', 'Inter', sans-serif; }
+
+  /* ---- Top bar ---- */
+  header.bar {
+    position: sticky; top: 0; z-index: 50;
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    backdrop-filter: saturate(160%) blur(14px);
+    border-bottom: 1px solid var(--line);
+  }
+  .bar-in {
+    max-width: 1120px; margin: 0 auto; padding: 12px 22px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  .wordmark { font-weight: 800; font-size: 18px; letter-spacing: .3px; color: var(--ink); text-decoration: none; }
+  .wordmark span { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .bar-actions { display: flex; gap: 10px; align-items: center; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-weight: 600; font-size: 14px; text-decoration: none;
+    padding: 9px 16px; border-radius: 10px; border: 1px solid transparent;
+    cursor: pointer; transition: transform .15s ease, filter .15s ease, background .15s;
+    white-space: nowrap;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn-grad { background: var(--grad); color: #fff; box-shadow: 0 6px 18px rgba(99,102,241,.35); }
+  .btn-grad:hover { filter: brightness(1.08); }
+  .btn-ghost { background: var(--card); color: var(--ink); border-color: var(--line); }
+  .btn-ghost:hover { border-color: color-mix(in srgb, var(--indigo) 50%, var(--line)); }
+
+  /* ---- Hero ---- */
+  .hero {
+    position: relative; overflow: hidden;
+    background: var(--grad);
+    color: #fff;
+    padding: 72px 22px 96px;
+    text-align: center;
+  }
+  .hero::after {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(1200px 400px at 50% -10%, rgba(255,255,255,.28), transparent 70%);
+    pointer-events: none;
+  }
+  .hero-in { max-width: 780px; margin: 0 auto; position: relative; z-index: 1; }
+  .hero .kicker {
+    display: inline-block; font-weight: 700; font-size: 12.5px; letter-spacing: 1.4px; text-transform: uppercase;
+    background: rgba(255,255,255,.18); padding: 6px 14px; border-radius: 999px; margin-bottom: 20px;
+  }
+  .hero h1 { font-size: clamp(30px, 6vw, 50px); font-weight: 800; line-height: 1.08; letter-spacing: -.5px; }
+  .hero p { font-size: clamp(15px, 2.4vw, 18px); opacity: .95; margin: 16px auto 30px; max-width: 620px; }
+  .hero .btn-ghost { background: rgba(255,255,255,.14); color: #fff; border-color: rgba(255,255,255,.35); }
+  .hero .btn-ghost:hover { background: rgba(255,255,255,.24); }
+  .hero .btn-light { background: #fff; color: var(--indigo); }
+  .hero-cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+  /* ---- Layout ---- */
+  .wrap { max-width: 1120px; margin: -56px auto 0; padding: 0 22px 80px; position: relative; z-index: 2; display: grid; grid-template-columns: 232px 1fr; gap: 34px; align-items: start; }
+  nav.toc {
+    position: sticky; top: 78px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+    padding: 14px; box-shadow: var(--shadow-sm);
+  }
+  nav.toc h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-faint); margin: 6px 8px 10px; }
+  nav.toc a {
+    display: flex; gap: 9px; align-items: center;
+    padding: 8px 10px; border-radius: 9px; text-decoration: none;
+    color: var(--ink-soft); font-size: 13.5px; font-weight: 500; transition: background .12s, color .12s;
+  }
+  nav.toc a:hover { background: var(--line-soft); color: var(--ink); }
+  nav.toc a .n { font-size: 12px; font-weight: 700; color: var(--indigo); width: 16px; text-align: center; }
+  main { min-width: 0; }
+
+  /* ---- Sections ---- */
+  section.doc {
+    background: var(--card); border: 1px solid var(--line); border-radius: 18px;
+    padding: 30px 32px; margin-bottom: 22px; box-shadow: var(--shadow-sm);
+  }
+  section.doc:target { outline: 2px solid color-mix(in srgb, var(--indigo) 60%, transparent); outline-offset: 3px; }
+  .sec-head { display: flex; align-items: center; gap: 14px; margin-bottom: 8px; }
+  .sec-num {
+    flex: none; width: 40px; height: 40px; border-radius: 12px; background: var(--grad);
+    color: #fff; font-family: 'Poppins'; font-weight: 800; font-size: 18px;
+    display: grid; place-items: center; box-shadow: 0 6px 16px rgba(99,102,241,.3);
+  }
+  section.doc h2 { font-size: 23px; font-weight: 700; letter-spacing: -.3px; }
+  section.doc h3 { font-size: 16.5px; font-weight: 700; margin: 22px 0 8px; color: var(--ink); }
+  section.doc p { color: var(--ink-soft); margin: 10px 0; }
+  section.doc strong { color: var(--ink); font-weight: 600; }
+  .lead { font-size: 16px; }
+
+  ul.clean { list-style: none; margin: 12px 0; display: grid; gap: 9px; }
+  ul.clean li { position: relative; padding-left: 26px; color: var(--ink-soft); }
+  ul.clean li::before { content: "✓"; position: absolute; left: 0; top: 0; color: var(--indigo); font-weight: 800; }
+
+  /* pillars / feature grid */
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 18px 0 4px; }
+  .tile { border: 1px solid var(--line); border-radius: 14px; padding: 16px; background: var(--bg); }
+  .tile .ic { font-size: 24px; }
+  .tile h3 { margin: 8px 0 4px; font-size: 15px; }
+  .tile p { font-size: 13.5px; margin: 0; }
+
+  /* hierarchy diagram */
+  .hier { margin: 16px 0; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); }
+  .hier .lvl { padding: 12px 14px; color: #fff; font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 10px; }
+  .hier .tag { font-size: 11px; text-transform: uppercase; letter-spacing: .8px; background: rgba(255,255,255,.22); padding: 2px 8px; border-radius: 6px; }
+  .hier .l1 { background: #3B82F6; }
+  .hier .l2 { background: #5b73ee; padding-left: 30px; }
+  .hier .l3 { background: #6d5ae8; padding-left: 46px; }
+  .hier .l4 { background: #8B5CF6; padding-left: 62px; }
+
+  /* numbered steps */
+  ol.steps { list-style: none; counter-reset: s; display: grid; gap: 12px; margin: 16px 0; }
+  ol.steps li { counter-increment: s; position: relative; padding: 14px 16px 14px 56px; background: var(--bg); border: 1px solid var(--line); border-radius: 13px; }
+  ol.steps li::before {
+    content: counter(s); position: absolute; left: 14px; top: 13px;
+    width: 28px; height: 28px; border-radius: 9px; background: var(--grad); color: #fff;
+    font-weight: 800; display: grid; place-items: center; font-size: 14px;
+  }
+  ol.steps li strong { display: block; margin-bottom: 2px; }
+  ol.steps li span { color: var(--ink-soft); font-size: 14px; }
+
+  /* tables */
+  .tbl-wrap { overflow-x: auto; margin: 16px 0; border: 1px solid var(--line); border-radius: 13px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 480px; }
+  th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--line); }
+  thead th { background: var(--line-soft); color: var(--ink); font-weight: 700; font-size: 12.5px; text-transform: uppercase; letter-spacing: .4px; }
+  tbody tr:last-child td { border-bottom: none; }
+  td .yes { color: #10b981; font-weight: 700; }
+  td .no { color: var(--ink-faint); }
+
+  /* callout */
+  .note { display: flex; gap: 12px; padding: 14px 16px; border-radius: 13px; margin: 16px 0; font-size: 14px; }
+  .note .ic { font-size: 18px; flex: none; }
+  .note.tip { background: color-mix(in srgb, var(--indigo) 10%, var(--card)); border: 1px solid color-mix(in srgb, var(--indigo) 28%, var(--line)); }
+  .note.warn { background: color-mix(in srgb, #f59e0b 12%, var(--card)); border: 1px solid color-mix(in srgb, #f59e0b 32%, var(--line)); }
+  .note p { margin: 0; color: var(--ink-soft); }
+
+  .pill { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: var(--grad); color: #fff; vertical-align: middle; }
+
+  /* faq */
+  details { border: 1px solid var(--line); border-radius: 12px; padding: 4px 16px; margin: 9px 0; background: var(--bg); }
+  details summary { cursor: pointer; font-weight: 600; padding: 11px 0; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::after { content: "+"; color: var(--indigo); font-weight: 800; font-size: 20px; }
+  details[open] summary::after { content: "–"; }
+  details p { padding-bottom: 12px; margin: 0; }
+
+  footer.foot { text-align: center; padding: 40px 22px 60px; color: var(--ink-faint); font-size: 14px; }
+  footer.foot a { color: var(--indigo); text-decoration: none; font-weight: 600; }
+  .foot-mark { font-family: 'Poppins'; font-weight: 800; font-size: 17px; color: var(--ink); margin-bottom: 6px; }
+  .foot-mark span { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  .to-top { position: fixed; right: 20px; bottom: 20px; z-index: 60; background: var(--grad); color: #fff; border: none; width: 46px; height: 46px; border-radius: 14px; font-size: 20px; cursor: pointer; box-shadow: var(--shadow); opacity: 0; pointer-events: none; transition: opacity .2s; }
+  .to-top.show { opacity: 1; pointer-events: auto; }
+
+  @media (max-width: 900px) {
+    .wrap { grid-template-columns: 1fr; }
+    nav.toc { position: static; order: -1; }
+    nav.toc .toc-links { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+    .grid3 { grid-template-columns: 1fr; }
+    section.doc { padding: 24px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="bar-in">
+    <a class="wordmark" href="/">PERSON<span>TASK</span></a>
+    <div class="bar-actions">
+      <a class="btn btn-ghost" href="/">Abrir o app</a>
+      <a class="btn btn-grad" href="/PERSONTASK-Manual.pdf" download>⬇ Baixar em PDF</a>
+    </div>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-in">
+    <span class="kicker">Manual de Operações</span>
+    <h1>Tudo sobre o PERSONTASK,<br>em poucos minutos.</h1>
+    <p>Organize <strong>tarefas e pessoas por responsabilidade</strong>, com prazos, alertas por e-mail e colaboração em tempo real. Este guia mostra como tirar o máximo da ferramenta.</p>
+    <div class="hero-cta">
+      <a class="btn btn-light" href="#s1">Começar a ler</a>
+      <a class="btn btn-ghost" href="/PERSONTASK-Manual.pdf" download>⬇ Versão em PDF</a>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <nav class="toc">
+    <h4>Conteúdo</h4>
+    <div class="toc-links">
+      <a href="#s1"><span class="n">1</span> O que é</a>
+      <a href="#s2"><span class="n">2</span> Conceitos</a>
+      <a href="#s3"><span class="n">3</span> Primeiros passos</a>
+      <a href="#s4"><span class="n">4</span> O card por dentro</a>
+      <a href="#s5"><span class="n">5</span> Pessoas &amp; acesso</a>
+      <a href="#s6"><span class="n">6</span> Alertas &amp; e-mail</a>
+      <a href="#s7"><span class="n">7</span> Planos</a>
+      <a href="#s8"><span class="n">8</span> Personalização</a>
+      <a href="#s9"><span class="n">9</span> Idiomas &amp; app</a>
+      <a href="#s10"><span class="n">10</span> Perguntas</a>
+    </div>
+  </nav>
+
+  <main>
+
+    <section class="doc" id="s1">
+      <div class="sec-head"><div class="sec-num">1</div><h2>O que é o PERSONTASK</h2></div>
+      <p class="lead">O PERSONTASK é um aplicativo de gestão de <strong>tarefas e pessoas</strong> no estilo quadro (Kanban), com um diferencial: tudo é organizado <strong>por responsabilidade</strong>. Você enxerga rapidamente quem cuida do quê, o que está próximo do prazo e o que precisa de atenção.</p>
+      <div class="grid3">
+        <div class="tile"><div class="ic">🗂️</div><h3>Tarefas</h3><p>Cartões com prazo, checklists, anexos, etiquetas e campos próprios.</p></div>
+        <div class="tile"><div class="ic">👥</div><h3>Pessoas</h3><p>Responsáveis por cada tarefa, com perfis de acesso e convites por e-mail.</p></div>
+        <div class="tile"><div class="ic">🎯</div><h3>Responsabilidade</h3><p>Alertas automáticos de checkpoint e entrega para ninguém perder o prazo.</p></div>
+      </div>
+    </section>
+
+    <section class="doc" id="s2">
+      <div class="sec-head"><div class="sec-num">2</div><h2>Conceitos essenciais</h2></div>
+      <p>Quatro palavras resumem toda a estrutura. Elas se encaixam uma dentro da outra:</p>
+      <div class="hier">
+        <div class="lvl l1"><span class="tag">Espaço</span> A área de trabalho (ex.: uma empresa, um setor, um projeto)</div>
+        <div class="lvl l2"><span class="tag">Painel</span> Um quadro dentro do Espaço (ex.: "Marketing 2026")</div>
+        <div class="lvl l3"><span class="tag">Coluna</span> Uma etapa/fase (ex.: "A fazer", "Fazendo", "Concluído")</div>
+        <div class="lvl l4"><span class="tag">Item</span> O cartão da tarefa em si</div>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Termo</th><th>O que é</th><th>Exemplo</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Espaço</strong></td><td>Sua área de trabalho — agrupa painéis, membros e configurações.</td><td>"TECHCONN"</td></tr>
+            <tr><td><strong>Painel</strong></td><td>Um quadro dentro do Espaço.</td><td>"Projetos 2026"</td></tr>
+            <tr><td><strong>Coluna</strong></td><td>Uma etapa do fluxo dentro do Painel.</td><td>"Em andamento"</td></tr>
+            <tr><td><strong>Item</strong></td><td>A tarefa (cartão) que se move entre as colunas.</td><td>"Criar proposta"</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note tip"><span class="ic">💡</span><p>Você arrasta os <strong>Itens</strong> entre as <strong>Colunas</strong> para mostrar o progresso — exatamente como um quadro físico de post-its, só que colaborativo e com alertas.</p></div>
+    </section>
+
+    <section class="doc" id="s3">
+      <div class="sec-head"><div class="sec-num">3</div><h2>Primeiros passos</h2></div>
+      <ol class="steps">
+        <li><strong>Crie sua conta</strong><span>Entre com <strong>e-mail e senha</strong> ou com <strong>“Continuar com Google”</strong>. É grátis e sem cartão. Esqueceu a senha? Use o link <strong>“Esqueceu a senha?”</strong> na tela de login.</span></li>
+        <li><strong>Crie seu primeiro Espaço</strong><span>Na tela inicial, clique em <strong>“Novo Espaço”</strong>, dê um nome (ex.: sua empresa) e confirme.</span></li>
+        <li><strong>Monte um Painel e Colunas</strong><span>Dentro do Espaço, crie um <strong>Painel</strong> e adicione <strong>Colunas</strong> (ex.: A fazer · Fazendo · Feito).</span></li>
+        <li><strong>Adicione Itens</strong><span>Clique em <strong>“Adicionar Item”</strong> numa Coluna e comece a descrever as tarefas.</span></li>
+        <li><strong>Convide sua equipe</strong><span>Em <strong>Membros</strong>, convide pessoas por e-mail e defina o perfil de acesso de cada uma.</span></li>
+      </ol>
+      <div class="note tip"><span class="ic">🧭</span><p>Todo Espaço novo já nasce com um cartão <strong>“ESTÁ PERDIDO?! COMECE POR AQUI”</strong> com o atalho para este manual. Pode apagá-lo quando quiser.</p></div>
+    </section>
+
+    <section class="doc" id="s4">
+      <div class="sec-head"><div class="sec-num">4</div><h2>O card (Item) por dentro</h2></div>
+      <p>Clique em qualquer Item para abrir o painel de detalhes. Use o botão <strong>“+ Adicionar”</strong> para revelar só o que precisar:</p>
+      <h3>🗓️ Datas &amp; prazos</h3>
+      <p>Defina a <strong>data de entrega</strong>. O cartão passa a mostrar o prazo e dispara alertas conforme a antecedência configurada no Espaço.</p>
+      <h3>👤 Responsáveis</h3>
+      <p>Atribua uma ou mais pessoas. Quem é definido como responsável recebe um <strong>e-mail de notificação</strong> na hora.</p>
+      <h3>🏷️ Etiquetas</h3>
+      <p>Marcadores coloridos para categorizar (ex.: “Urgente”, “Cliente”). Ficam sempre à mão no cartão.</p>
+      <h3>☑️ Checklists</h3>
+      <p>Listas de subtarefas com <strong>barra de progresso em %</strong>. Perfeito para quebrar uma tarefa grande em passos.</p>
+      <h3>🧩 Campos personalizados</h3>
+      <p>Crie campos do seu jeito: <strong>texto, número, data/hora, caixa de seleção</strong> ou <strong>lista suspensa</strong>. Você escolhe quais aparecem na face do cartão.</p>
+      <h3>📎 Anexos</h3>
+      <p>Envie <strong>PDF, Excel, Word, PowerPoint e imagens</strong> — clicando ou arrastando os arquivos para o cartão.</p>
+      <h3>💬 Comentários &amp; menções</h3>
+      <p>Converse dentro do cartão. Use <strong>@</strong> para mencionar alguém — a pessoa recebe um e-mail avisando.</p>
+      <h3>📄 Duplicar</h3>
+      <p>O botão <strong>“Duplicar card”</strong> copia tudo (conteúdo, checklists, campos, etiquetas, responsáveis e anexos) para reaproveitar tarefas repetitivas.</p>
+      <div class="note tip"><span class="ic">🔗</span><p>Colou um link na descrição de um cartão? Ele vira automaticamente um <strong>botão clicável</strong> logo abaixo do texto.</p></div>
+    </section>
+
+    <section class="doc" id="s5">
+      <div class="sec-head"><div class="sec-num">5</div><h2>Pessoas &amp; perfis de acesso</h2></div>
+      <p>Em <strong>Membros</strong>, você gerencia quem participa do Espaço e o que cada um pode fazer.</p>
+      <ul class="clean">
+        <li><strong>Convidar por e-mail</strong> — apenas administradores convidam. A pessoa recebe um e-mail para entrar.</li>
+        <li><strong>Perfis de acesso</strong> — vêm três prontos e <strong>editáveis</strong>: Usuário, Gestor e Administrador. O administrador máximo pode ajustar as permissões de cada perfil.</li>
+      </ul>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Perfil</th><th>Uso típico</th><th>Poder</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Usuário</strong></td><td>Colaborador do dia a dia</td><td>Cria e edita Itens, comenta</td></tr>
+            <tr><td><strong>Gestor</strong></td><td>Líder de área</td><td>Gerencia Painéis, Colunas, etiquetas e campos</td></tr>
+            <tr><td><strong>Administrador</strong></td><td>Dono/gestor do Espaço</td><td>Tudo, incluindo membros, convites e configurações</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note tip"><span class="ic">🛠️</span><p>As permissões são flexíveis: o administrador pode <strong>criar novos perfis</strong> e marcar exatamente o que cada um enxerga e edita.</p></div>
+    </section>
+
+    <section class="doc" id="s6">
+      <div class="sec-head"><div class="sec-num">6</div><h2>Alertas &amp; notificações por e-mail</h2></div>
+      <p>O PERSONTASK envia e-mails automáticos nos momentos que importam:</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Gatilho</th><th>Quando dispara</th></tr></thead>
+          <tbody>
+            <tr><td>📌 <strong>Tarefa atribuída</strong></td><td>Assim que você é definido como responsável por um Item.</td></tr>
+            <tr><td>⏰ <strong>Prazo próximo</strong></td><td>Automaticamente, com a antecedência (em dias) definida no Espaço.</td></tr>
+            <tr><td>💬 <strong>Menção</strong></td><td>Quando alguém usa <strong>@</strong> para mencionar você num comentário.</td></tr>
+            <tr><td>✉️ <strong>Convite</strong></td><td>Quando um administrador convida você para um Espaço.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note warn"><span class="ic">📬</span><p>O <strong>primeiro</strong> e-mail que você receber pode cair no <strong>spam/lixo eletrônico</strong> até seu provedor reconhecer o remetente. Marque como “não é spam” e os próximos chegam na caixa de entrada.</p></div>
+    </section>
+
+    <section class="doc" id="s7">
+      <div class="sec-head"><div class="sec-num">7</div><h2>Planos: Grátis e Premium</h2></div>
+      <p>Comece de graça. O <span class="pill">Premium</span> libera personalização e escala.</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Recurso</th><th>Grátis</th><th>Premium</th></tr></thead>
+          <tbody>
+            <tr><td>Tarefas, prazos, checklists, anexos, comentários</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+            <tr><td>Membros e convites por e-mail</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+            <tr><td>Quantidade de Espaços</td><td class="no">1</td><td class="yes">Vários</td></tr>
+            <tr><td>Painéis por Espaço</td><td class="no">1</td><td class="yes">Vários</td></tr>
+            <tr><td>Imagem de fundo e escolha de fonte</td><td class="no">—</td><td class="yes">✓</td></tr>
+            <tr><td>Cores personalizadas de Coluna</td><td class="no">—</td><td class="yes">✓</td></tr>
+            <tr><td>Logotipo da empresa</td><td class="no">—</td><td class="yes">✓</td></tr>
+            <tr><td>Espaços interligados</td><td class="no">—</td><td class="yes">✓</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note tip"><span class="ic">⭐</span><p>A ativação do Premium é feita no seu <strong>perfil</strong>. A cobrança automática será adicionada em breve.</p></div>
+    </section>
+
+    <section class="doc" id="s8">
+      <div class="sec-head"><div class="sec-num">8</div><h2>Personalização <span class="pill">Premium</span></h2></div>
+      <p>Deixe o Espaço com a cara da sua marca em <strong>Configurações do Espaço</strong>:</p>
+      <ul class="clean">
+        <li><strong>Cor ou imagem de fundo</strong> do quadro.</li>
+        <li><strong>Fonte da interface</strong> — escolha entre várias tipografias.</li>
+        <li><strong>Logotipo da empresa</strong> — aparece como marca d’água no fundo.</li>
+        <li><strong>Espaços interligados</strong> — conecte áreas de trabalho relacionadas.</li>
+        <li><strong>Antecedência do alerta</strong> de vencimento (em dias).</li>
+      </ul>
+    </section>
+
+    <section class="doc" id="s9">
+      <div class="sec-head"><div class="sec-num">9</div><h2>Idiomas, tema e app</h2></div>
+      <ul class="clean">
+        <li><strong>3 idiomas</strong> — Português, Inglês e Espanhol, trocáveis no menu do perfil.</li>
+        <li><strong>Tema claro ou escuro</strong> — a interface acompanha sua preferência.</li>
+        <li><strong>Instale como aplicativo (PWA)</strong> — no navegador, use “Instalar app” para ter o PERSONTASK na área de trabalho ou no celular, com ícone próprio.</li>
+      </ul>
+      <div class="note tip"><span class="ic">📖</span><p>Precisa rever este manual? Ele está sempre no menu do seu perfil, em <strong>“Manual / Ajuda”</strong>.</p></div>
+    </section>
+
+    <section class="doc" id="s10">
+      <div class="sec-head"><div class="sec-num">10</div><h2>Perguntas frequentes</h2></div>
+      <details><summary>Posso usar sem pagar?</summary><p>Sim. O plano Grátis cobre o essencial: 1 Espaço com tarefas, prazos, checklists, anexos, membros e notificações por e-mail.</p></details>
+      <details><summary>Como convido pessoas?</summary><p>Em <strong>Membros → Convidar por e-mail</strong> (disponível para administradores). A pessoa recebe um e-mail com o convite para o Espaço.</p></details>
+      <details><summary>Quais arquivos posso anexar?</summary><p>PDF, Excel, Word, PowerPoint e imagens — clicando no cartão ou arrastando os arquivos para dentro dele.</p></details>
+      <details><summary>Não recebi o e-mail de notificação.</summary><p>Confira a caixa de <strong>spam/lixo eletrônico</strong> — o primeiro e-mail costuma cair lá. Marque como “não é spam” para os próximos chegarem na entrada.</p></details>
+      <details><summary>Esqueci minha senha. Como recupero?</summary><p>Na tela de login, clique em <strong>“Esqueceu a senha?”</strong>, informe seu e-mail e siga o link que enviaremos para criar uma nova senha.</p></details>
+      <details><summary>Perdi o cartão de boas-vindas. E agora?</summary><p>Sem problema: o manual fica sempre acessível no <strong>menu do perfil → “Manual / Ajuda”</strong>, e você pode baixá-lo em PDF aqui em cima.</p></details>
+    </section>
+
+  </main>
+</div>
+
+<footer class="foot">
+  <div class="foot-mark">PERSON<span>TASK</span></div>
+  <p>Dúvidas ou suporte: <a href="mailto:contato.persontask@gmail.com">contato.persontask@gmail.com</a></p>
+  <p style="margin-top:6px">© 2026 PERSONTASK — Tarefas e pessoas, por responsabilidade.</p>
+</footer>
+
+<button class="to-top" id="toTop" aria-label="Voltar ao topo">↑</button>
+<script>
+  var btn = document.getElementById('toTop');
+  addEventListener('scroll', function () {
+    if (scrollY > 500) btn.classList.add('show'); else btn.classList.remove('show');
+  });
+  btn.addEventListener('click', function () { scrollTo({ top: 0, behavior: 'smooth' }); });
+</script>
+</body>
+</html>

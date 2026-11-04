@@ -58,7 +58,28 @@ export interface Space {
   font_family: string;
   logo_url: string | null;
   due_soon_lead_days: number;
+  /** Moeda do Espaço em ISO 4217 (BRL, USD, EUR…). Padrão: BRL. */
+  currency?: string;
+  /**
+   * Padrão ao migrar um card para outro Espaço: `true` mantém o card aqui
+   * também (cópia), preservando histórico e os números dos relatórios.
+   */
+  keep_on_migrate?: boolean;
   created_at: string;
+}
+
+/** Papel de uma Coluna no funil, para o relatório. */
+export type ColumnRole = 'open' | 'won' | 'lost' | 'ignore';
+
+/**
+ * Configuração do relatório de Funil de um Painel. Sem ela, o relatório
+ * não tem como saber o que é "ganho" nem qual campo é o valor do negócio.
+ */
+export interface ReportConfig {
+  /** Campo personalizado (numérico) que guarda o valor do negócio. */
+  valueFieldId: string | null;
+  /** Papel de cada Coluna, por id. Coluna ausente = `open`. */
+  columnRoles: Record<string, ColumnRole>;
 }
 
 export interface AccessProfile {
@@ -84,6 +105,8 @@ export interface Board {
   space_id: string;
   name: string;
   position: number;
+  /** Relatório de Funil. Nulo = Painel ainda não configurado. */
+  report_config?: ReportConfig | null;
   created_at: string;
 }
 
@@ -110,10 +133,17 @@ export interface CustomFieldDef {
   space_id: string;
   name: string;
   type: FieldType;
-  config: { options?: string[] };
+  config: {
+    options?: string[];
+    /** Campo numérico exibido como dinheiro, na moeda do Espaço. */
+    money?: boolean;
+  };
   show_on_face_default: boolean;
   position: number;
 }
+
+/** Visões do Painel: quadro, lista e relatório. */
+export type ViewMode = 'board' | 'schedule' | 'report';
 
 export type ChecklistValue = { text: string; done: boolean }[];
 
@@ -168,6 +198,32 @@ export interface Item {
   checklists: Checklist[];
   position: number;
   due_at: string | null;
+  /**
+   * Quando o card foi marcado como CONCLUÍDO (nulo = em aberto). Deixa o
+   * semáforo verde e silencia o aviso de prazo, mesmo vencido.
+   */
+  done_at?: string | null;
+  /** CRM: vínculo com o cadastro de Organização (opcional). */
+  organization_id?: string | null;
+  /** CRM: vínculo com o cadastro de Pessoa de contato (opcional). */
+  contact_id?: string | null;
+  /** Organização vinculada, trazida junto na listagem do Painel (só id + nome). */
+  organization?: { id: string; name: string } | null;
+  // ── Cronograma (gestão de projetos) ──
+  /** Início planejado. O Término é o `due_at`. */
+  start_at?: string | null;
+  /** Trabalho: esforço alocado, em horas. */
+  work_hours?: number | null;
+  /** Custo previsto/acumulado da atividade. */
+  cost?: number | null;
+  /** % concluído explícito (0–100). Se nulo, usa o % do checklist. */
+  progress?: number | null;
+  /** Modo de agendamento da tarefa. */
+  schedule_mode?: 'manual' | 'auto' | null;
+  /** Cronograma do projeto: tarefas dentro deste card (card = projeto). */
+  schedule_tasks?: ScheduleTask[];
+  /** Calendário de trabalho do projeto (nulo = padrão seg–sex, 8h). */
+  schedule_calendar?: ScheduleCalendar | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -177,6 +233,93 @@ export interface Item {
   field_values?: ItemFieldValue[];
   attachments?: Attachment[];
   comments?: Comment[];
+}
+
+/**
+ * Uma linha do cronograma do projeto (guardada em `items.schedule_tasks`).
+ * `indent` 0 = fase (EDT "1"), 1 = tarefa (EDT "1.1").
+ */
+export interface ScheduleTask {
+  id: string;
+  name: string;
+  indent: number;
+  start: string | null;
+  end: string | null;
+  progress: number;
+  work: number | null;
+  cost: number | null;
+  mode: 'manual' | 'auto';
+  /**
+   * Duração em dias ÚTEIS. No modo automático é a entrada (as datas são
+   * calculadas a partir dela); no manual é mantida em sincronia com as datas.
+   */
+  duration?: number | null;
+  /** ids das tarefas predecessoras (término → início). */
+  predecessors: string[];
+  notes: string;
+  /**
+   * Recurso único alocado. Formato antigo, mantido para ler cronogramas
+   * gravados antes dos múltiplos responsáveis — use `resourceIdsOf()`.
+   */
+  resourceId?: string | null;
+  /** Recursos (pessoas) alocados — o custo soma o custo/hora de todos. */
+  resourceIds?: string[] | null;
+}
+
+/** Calendário de trabalho de um projeto (dias úteis, feriados, jornada). */
+export interface ScheduleCalendar {
+  /** Dias da semana que são úteis — 0 = domingo … 6 = sábado. */
+  workdays: number[];
+  /** Feriados no formato YYYY-MM-DD. */
+  holidays: string[];
+  /** Horas de trabalho por dia. */
+  hoursPerDay: number;
+}
+
+/** Recurso (pessoa envolvida) do Espaço, com custo por hora. */
+export interface Resource {
+  id: string;
+  space_id: string;
+  name: string;
+  role: string | null;
+  hourly_cost: number | null;
+  email: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Cadastro de Organização (empresa/cliente) — reutilizável entre negócios. */
+export interface Organization {
+  id: string;
+  space_id: string;
+  name: string;
+  fantasy_name: string | null;
+  cnpj: string | null;
+  status: string | null;
+  system: string | null;
+  segment: string | null;
+  address: string | null;
+  website: string | null;
+  email: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Cadastro de Pessoa de contato — reutilizável entre negócios. */
+export interface Contact {
+  id: string;
+  space_id: string;
+  organization_id: string | null;
+  name: string;
+  phone: string | null;
+  phone_type: string | null;
+  email: string | null;
+  email_type: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Invite {

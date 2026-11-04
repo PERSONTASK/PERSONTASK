@@ -1,4 +1,5 @@
 import { useEffect, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -19,6 +20,9 @@ export function Modal({
   children,
   footer,
   width = 480,
+  fullScreen = false,
+  headerExtra,
+  bodyScroll = true,
 }: {
   open: boolean;
   onClose: () => void;
@@ -26,33 +30,65 @@ export function Modal({
   children: ReactNode;
   footer?: ReactNode;
   width?: number;
+  /** Ocupa quase toda a tela (útil para tabelas largas, como o cronograma). */
+  fullScreen?: boolean;
+  /** Botões extras ao lado do "fechar" (ex.: maximizar). */
+  headerExtra?: ReactNode;
+  /**
+   * `false` quando o próprio conteúdo controla a rolagem — o corpo vira um
+   * flex de altura fixa. É o que mantém a barra de rolagem horizontal
+   * **visível no rodapé** de tabelas largas, em vez de lá no fim do conteúdo.
+   */
+  bodyScroll?: boolean;
 }) {
   useEscape(open, onClose);
   if (!open) return null;
-  return (
+  // Portal no <body>: sem isso, um ancestral com `transform` (ex.: o painel
+  // lateral do card, que desliza) vira o bloco de contenção e prende este
+  // `fixed` dentro dele — o modal não ocuparia a tela toda.
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+      className={cn(
+        'fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm',
+        fullScreen ? 'p-0 sm:p-3' : 'p-4',
+      )}
       onMouseDown={onClose}
     >
       <div
-        className="max-h-[90vh] w-full overflow-hidden rounded-xl border border-line/10 bg-surface-overlay shadow-lift animate-scale-in"
-        style={{ maxWidth: width }}
+        className={cn(
+          'overflow-hidden rounded-xl border border-line/10 bg-surface-overlay shadow-lift animate-scale-in',
+          fullScreen
+            ? 'flex h-[100vh] w-full max-w-none flex-col rounded-none sm:h-[94vh] sm:rounded-xl'
+            : 'max-h-[90vh] w-full',
+        )}
+        style={fullScreen ? undefined : { maxWidth: width }}
         onMouseDown={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
       >
-        <div className="flex items-center justify-between border-b border-line/10 px-5 py-3.5">
-          <h3 className="text-sm font-bold">{title}</h3>
-          <button className="btn-ghost h-8 w-8 rounded-lg p-0" onClick={onClose} aria-label="Fechar">
-            <X size={18} />
-          </button>
+        <div className="flex items-center justify-between gap-2 border-b border-line/10 px-5 py-3.5">
+          <h3 className="min-w-0 text-sm font-bold">{title}</h3>
+          <div className="flex shrink-0 items-center gap-1">
+            {headerExtra}
+            <button className="btn-ghost h-8 w-8 rounded-lg p-0" onClick={onClose} aria-label="Fechar">
+              <X size={18} />
+            </button>
+          </div>
         </div>
-        <div className="max-h-[70vh] overflow-y-auto p-5">{children}</div>
+        <div
+          className={cn(
+            bodyScroll ? 'overflow-auto' : 'min-h-0 overflow-hidden',
+            fullScreen ? 'flex-1 p-3 sm:p-5' : 'max-h-[70vh] p-5',
+          )}
+        >
+          {children}
+        </div>
         {footer && (
-          <div className="flex justify-end gap-2 border-t border-line/10 px-5 py-3">{footer}</div>
+          <div className="flex flex-wrap justify-end gap-2 border-t border-line/10 px-5 py-3">{footer}</div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

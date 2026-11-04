@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, Search, Users, Settings, Plus, LayoutGrid } from 'lucide-react';
-import type { Board, Space } from '@/types';
+import { ChevronDown, Search, Users, Settings, Plus, LayoutGrid, Lock, Pencil, Trash2, Building2 } from 'lucide-react';
+import type { Board, Space, ViewMode } from '@/types';
+import type { OverdueItem } from '@/lib/api';
 import { Logo } from '@/components/Logo';
 import { ProfileMenu } from '@/components/ProfileMenu';
+import { NotificationsBell } from './NotificationsBell';
 import { cn } from '@/lib/utils';
 
 export function SpaceTopBar({
@@ -14,14 +16,25 @@ export function SpaceTopBar({
   activeBoardId,
   query,
   canCreateBoard,
+  boardLimitReached,
+  canEditBoard,
+  canDeleteBoard,
   canManageMembers,
   canManageSpace,
   isPremium,
   onSelectBoard,
   onAddBoard,
+  onRenameBoard,
+  onDeleteBoard,
   onQuery,
   onOpenMembers,
   onOpenSettings,
+  onOpenClients,
+  viewMode,
+  onViewMode,
+  alertsToken,
+  onOpenAlertItem,
+  canEditItem,
 }: {
   space: Space;
   switchableSpaces: Space[];
@@ -29,17 +42,30 @@ export function SpaceTopBar({
   activeBoardId: string | null;
   query: string;
   canCreateBoard: boolean;
+  boardLimitReached: boolean;
+  canEditBoard: boolean;
+  canDeleteBoard: boolean;
   canManageMembers: boolean;
   canManageSpace: boolean;
   isPremium: boolean;
   onSelectBoard: (id: string) => void;
   onAddBoard: () => void;
+  onRenameBoard: (b: Board) => void;
+  onDeleteBoard: (b: Board) => void;
   onQuery: (q: string) => void;
   onOpenMembers: () => void;
   onOpenSettings: () => void;
+  onOpenClients: () => void;
+  viewMode: ViewMode;
+  onViewMode: (v: ViewMode) => void;
+  /** Muda quando algo do Espaço mudou — faz o sininho recarregar. */
+  alertsToken: number;
+  onOpenAlertItem: (item: OverdueItem) => void;
+  canEditItem: boolean;
 }) {
   const { t } = useTranslation();
   const [switcher, setSwitcher] = useState(false);
+  const [menuBoardId, setMenuBoardId] = useState<string | null>(null);
   const canSwitch = isPremium && switchableSpaces.length > 1;
 
   return (
@@ -111,6 +137,20 @@ export function SpaceTopBar({
         </div>
 
         <div className="ml-auto flex items-center gap-1">
+          <button
+            className="btn-ghost h-9 rounded-lg px-2.5"
+            onClick={onOpenClients}
+            title={t('crm.manage')}
+          >
+            <Building2 size={17} />
+            <span className="hidden lg:inline">{t('crm.organizations')}</span>
+          </button>
+          <NotificationsBell
+            spaceId={space.id}
+            canEdit={canEditItem}
+            reloadToken={alertsToken}
+            onOpenItem={onOpenAlertItem}
+          />
           {canManageMembers && (
             <button className="btn-ghost h-9 rounded-lg px-2.5" onClick={onOpenMembers} title={t('members.title')}>
               <Users size={17} />
@@ -131,29 +171,96 @@ export function SpaceTopBar({
       {/* Board tabs */}
       <div className="flex items-center gap-1 px-4 pb-1.5">
         <LayoutGrid size={14} className="mr-1 text-ink-faint" />
-        {boards.map((b) => (
-          <button
-            key={b.id}
-            onClick={() => onSelectBoard(b.id)}
-            className={cn(
-              'rounded-lg px-3 py-1.5 text-sm font-medium transition',
-              b.id === activeBoardId
-                ? 'bg-brand-gradient text-white'
-                : 'text-ink-soft hover:bg-line/5 hover:text-ink',
-            )}
-          >
-            {b.name}
-          </button>
-        ))}
-        {canCreateBoard && (
-          <button
-            onClick={onAddBoard}
-            className="rounded-lg px-2 py-1.5 text-ink-faint transition hover:bg-line/5 hover:text-brand-indigo"
-            title={t('board.addBoard')}
-          >
-            <Plus size={16} />
-          </button>
-        )}
+        {boards.map((b) => {
+          const active = b.id === activeBoardId;
+          const hasMenu = active && (canEditBoard || canDeleteBoard);
+          return (
+            <div key={b.id} className="relative flex items-center">
+              <button
+                onClick={() => onSelectBoard(b.id)}
+                className={cn(
+                  'px-3 py-1.5 text-sm font-medium transition',
+                  active ? 'bg-brand-gradient text-white' : 'text-ink-soft hover:bg-line/5 hover:text-ink',
+                  hasMenu ? 'rounded-l-lg' : 'rounded-lg',
+                )}
+              >
+                {b.name}
+              </button>
+              {hasMenu && (
+                <button
+                  onClick={() => setMenuBoardId((id) => (id === b.id ? null : b.id))}
+                  onBlur={() => setTimeout(() => setMenuBoardId(null), 150)}
+                  className="rounded-r-lg bg-brand-gradient py-1.5 pl-0.5 pr-2 text-white/90 transition hover:text-white"
+                  title={t('common.edit')}
+                >
+                  <ChevronDown size={14} />
+                </button>
+              )}
+              {menuBoardId === b.id && (
+                <div className="absolute left-0 top-9 z-30 w-48 overflow-hidden rounded-xl border border-line/10 bg-surface-overlay py-1 shadow-lift">
+                  {canEditBoard && (
+                    <button
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => {
+                        setMenuBoardId(null);
+                        onRenameBoard(b);
+                      }}
+                      className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-line/5"
+                    >
+                      <Pencil size={14} /> {t('board.rename')}
+                    </button>
+                  )}
+                  {canDeleteBoard && (
+                    <button
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => {
+                        setMenuBoardId(null);
+                        onDeleteBoard(b);
+                      }}
+                      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-red-500/10"
+                    >
+                      <Trash2 size={14} /> {t('board.deleteBoard')}
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+        {canCreateBoard &&
+          (boardLimitReached ? (
+            <button
+              disabled
+              className="cursor-not-allowed rounded-lg px-2 py-1.5 text-ink-faint/50"
+              title={t('board.freeLimitReached')}
+            >
+              <Lock size={15} />
+            </button>
+          ) : (
+            <button
+              onClick={onAddBoard}
+              className="rounded-lg px-2 py-1.5 text-ink-faint transition hover:bg-line/5 hover:text-brand-indigo"
+              title={t('board.addBoard')}
+            >
+              <Plus size={16} />
+            </button>
+          ))}
+
+        {/* Alternador de visão: Quadro · Lista · Relatório */}
+        <div className="ml-auto flex items-center gap-0.5 rounded-lg bg-surface-raised p-0.5">
+          {(['board', 'schedule', 'report'] as const).map((v) => (
+            <button
+              key={v}
+              onClick={() => onViewMode(v)}
+              className={cn(
+                'rounded-md px-2.5 py-1 text-xs font-semibold transition',
+                viewMode === v ? 'bg-brand-gradient text-white' : 'text-ink-soft hover:text-ink',
+              )}
+            >
+              {t(`view.${v}`)}
+            </button>
+          ))}
+        </div>
       </div>
     </header>
   );

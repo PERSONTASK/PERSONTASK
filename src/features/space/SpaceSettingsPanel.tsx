@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Crown, Trash2, Upload, Palette, Type, Bell, Tag, ListChecks, Link2, Building2, Save } from 'lucide-react';
+import { Crown, Trash2, Upload, Palette, Type, Bell, Tag, ListChecks, Link2, Building2, Save, Pencil, Coins, ArrowRightLeft } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSpace } from '@/contexts/SpaceContext';
 import type { Label, Space } from '@/types';
 import { SidePanel } from '@/components/Modal';
 import { cn } from '@/lib/utils';
+import { CURRENCIES, DEFAULT_CURRENCY, currencySymbol, formatMoney } from '@/lib/money';
 import { FieldsManager } from './FieldsManager';
 
 const BG_COLORS = ['#6366F1', '#3B82F6', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#0EA5E9', '#64748B'];
@@ -34,7 +35,7 @@ function SettingsSection({ icon, title, children }: { icon: ReactNode; title: st
 }
 
 export function SpaceSettingsPanel({ onClose }: { onClose: () => void }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { isPremium } = useAuth();
   const { space, isOwner, labels, fieldDefs, reloadSpace, reloadLabels, reloadFields } = useSpace();
   const navigate = useNavigate();
@@ -77,6 +78,24 @@ export function SpaceSettingsPanel({ onClose }: { onClose: () => void }) {
       }
     >
       <div className="space-y-7">
+        {/* Name & description */}
+        <SettingsSection icon={<Pencil size={13} />} title={t('space.name')}>
+          <input
+            className="field"
+            defaultValue={space.name}
+            onBlur={(e) => {
+              const v = e.target.value.trim();
+              if (v && v !== space.name) patchSpace({ name: v });
+            }}
+          />
+          <label className="label mt-3 block">{t('space.description')}</label>
+          <textarea
+            className="field min-h-[60px] resize-y"
+            defaultValue={space.description ?? ''}
+            onBlur={(e) => e.target.value !== (space.description ?? '') && patchSpace({ description: e.target.value })}
+          />
+        </SettingsSection>
+
         {/* Appearance */}
         <SettingsSection icon={<Palette size={13} />} title={t('space.appearance')}>
           <div>
@@ -192,6 +211,40 @@ export function SpaceSettingsPanel({ onClose }: { onClose: () => void }) {
             defaultValue={space.due_soon_lead_days}
             onBlur={(e) => patchSpace({ due_soon_lead_days: Math.max(0, Number(e.target.value) || 0) })}
           />
+        </SettingsSection>
+
+        {/* Moeda do Espaço: vale para Custo, Custo/hora e campos de moeda */}
+        <SettingsSection icon={<Coins size={13} />} title={t('space.currency')}>
+          <select
+            className="field w-48"
+            value={space.currency || DEFAULT_CURRENCY}
+            onChange={(e) => patchSpace({ currency: e.target.value })}
+          >
+            {CURRENCIES.map((c) => (
+              <option key={c} value={c}>
+                {c} · {currencySymbol(c, i18n.language)} · {formatMoney(1234.5, c, i18n.language)}
+              </option>
+            ))}
+          </select>
+          <p className="mt-1 text-[11px] text-ink-faint">{t('space.currencyHint')}</p>
+        </SettingsSection>
+
+        {/* Padrão ao migrar card para outro Espaço */}
+        <SettingsSection icon={<ArrowRightLeft size={13} />} title={t('space.migrate')}>
+          <label className="flex cursor-pointer items-start gap-2.5">
+            <input
+              type="checkbox"
+              className="mt-0.5 accent-brand-indigo"
+              checked={space.keep_on_migrate ?? true}
+              onChange={(e) => patchSpace({ keep_on_migrate: e.target.checked })}
+            />
+            <span>
+              <span className="block text-sm">{t('space.keepOnMigrate')}</span>
+              <span className="block text-[11px] leading-snug text-ink-faint">
+                {t('space.keepOnMigrateHint')}
+              </span>
+            </span>
+          </label>
         </SettingsSection>
 
         {/* Labels */}

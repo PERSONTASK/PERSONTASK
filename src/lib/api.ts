@@ -5,16 +5,23 @@ import type {
   Board,
   Column,
   Comment,
+  Contact,
   CustomFieldDef,
   Invite,
   Item,
   ItemFieldValue,
   Label,
+  Organization,
   Permission,
   Profile,
+  ReportConfig,
+  Resource,
+  ScheduleTask,
   Space,
   SpaceMember,
 } from '@/types';
+import type { TemplateDef } from './templates';
+import { autoSchedule, DEFAULT_CALENDAR, nextWorkday, rollupTasks } from './schedule';
 
 // Raw item row with embedded relations (before hydration with profile/label maps).
 interface RawItem extends Omit<Item, 'assignees' | 'labels' | 'attachments' | 'comments'> {
@@ -27,6 +34,134 @@ interface RawItem extends Omit<Item, 'assignees' | 'labels' | 'attachments' | 'c
 
 function embeddedCount(rel?: { count: number }[]): number {
   return rel?.[0]?.count ?? 0;
+}
+
+/** Evento disparado sempre que um card muda. */
+export const ITEMS_CHANGED = 'persontask:items-changed';
+
+/**
+ * Avisa a interface que algum card mudou. Quem depende de uma visão geral
+ * do Espaço — hoje o sininho de prazos — escuta e se recarrega sozinho,
+ * sem precisar que cada tela saiba da existência dele.
+ */
+function itemsChanged() {
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event(ITEMS_CHANGED));
+}
+
+/** Card vencido com o Painel/Coluna onde ele está (para o sininho). */
+export interface OverdueItem extends Item {
+  boardId: string | null;
+  boardName: string;
+  columnTitle: string;
+}
+
+/**
+ * Monta o cronograma modelo de um card de template: fases e tarefas em
+ * **modo automático**, com as predecessoras **encadeadas** (cada tarefa
+ * depende da anterior; fases não entram na corrente).
+ *
+ * Com durações de exemplo, o `autoSchedule` já devolve o cronograma
+ * **datado** a partir do próximo dia útil — o usuário abre o card e vê um
+ * projeto montado, que é só ajustar. Sem durações, nasce em branco.
+ */
+function buildTemplateSchedule(
+  steps?: { name: string; indent: number; duration: number | null }[],
+): ScheduleTask[] {
+  if (!steps?.length) return [];
+  const hours = DEFAULT_CALENDAR.hoursPerDay;
+
+  const tasks: ScheduleTask[] = steps.map((step) => ({
+    id: crypto.randomUUID(),
+    name: step.name,
+    indent: step.indent,
+    start: null,
+    end: null,
+    progress: 0,
+    work: step.duration === null ? null : Number((step.duration * hours).toFixed(2)),
+    cost: null,
+    mode: 'auto',
+    duration: step.duration,
+    predecessors: [],
+    notes: '',
+  }));
+
+  let previousTask: string | null = null;
+  for (const task of tasks) {
+    if (task.indent === 0) continue; // fase: consolida os filhos, não é agendada
+    if (previousTask) task.predecessors = [previousTask];
+    previousTask = task.id;
+  }
+
+  const dated = tasks.some((t) => t.duration !== null);
+  if (!dated) return tasks;
+
+  // Começa no próximo dia útil — o exemplo nunca nasce no passado.
+  const start = nextWorkday(new Date().toISOString(), DEFAULT_CALENDAR);
+  return autoSchedule(tasks, DEFAULT_CALENDAR, start);
+}
+
+/**
+ * Copia um Item para OUTRO Espaço/Coluna (usado por Espaços interligados).
+ * Leva conteúdo portátil (título, descrição, checklists, prazo) e os anexos
+ * (recopiados no Storage sob o Espaço de destino). NÃO leva responsáveis,
+ * etiquetas nem campos personalizados — esses são específicos de cada Espaço.
+ * Roda como o usuário atual: o RLS garante que só quem é membro do Espaço de
+ * destino consegue inserir lá (por isso, na prática, só o Administrador que
+ * interligou os Espaços — membros comuns nem enxergam o outro Espaço).
+ */
+async function copyItemToSpace(input: {
+  sourceId: string;
+  targetSpaceId: string;
+  targetColumnId: string;
+  createdBy: string;
+}): Promise<string> {
+  const { data: src, error } = await supabase.from('items').select('*').eq('id', input.sourceId).single();
+  if (error) throw error;
+  const s = src as any;
+  const newId = crypto.randomUUID();
+  const checklists = (s.checklists ?? []).map((cl: any) => ({
+    id: crypto.randomUUID(),
+    title: cl.title,
+    items: (cl.items ?? []).map((it: any) => ({ id: crypto.randomUUID(), text: it.text, done: it.done })),
+  }));
+  const ins = await supabase.from('items').insert({
+    id: newId,
+    column_id: input.targetColumnId,
+    space_id: input.targetSpaceId,
+    title: s.title,
+    description: s.description ?? '',
+    checklists,
+    position: 0,
+    due_at: s.due_at,
+    // Cronograma acompanha o card. Organização/contato NÃO vão: são
+    // cadastros do Espaço de origem e não existem no destino.
+    start_at: s.start_at ?? null,
+    work_hours: s.work_hours ?? null,
+    cost: s.cost ?? null,
+    progress: s.progress ?? null,
+    schedule_mode: s.schedule_mode ?? null,
+    schedule_tasks: s.schedule_tasks ?? [],
+    created_by: input.createdBy,
+  });
+  if (ins.error) throw ins.error;
+
+  const { data: atts } = await supabase.from('attachments').select('*').eq('item_id', input.sourceId);
+  for (const a of atts ?? []) {
+    const newPath = `${input.targetSpaceId}/${newId}/${crypto.randomUUID()}-${a.file_name}`;
+    const cp = await supabase.storage.from(BUCKETS.attachments).copy(a.storage_path, newPath);
+    if (!cp.error) {
+      await supabase.from('attachments').insert({
+        item_id: newId,
+        space_id: input.targetSpaceId,
+        storage_path: newPath,
+        file_name: a.file_name,
+        mime_type: a.mime_type,
+        size_bytes: a.size_bytes,
+        uploaded_by: input.createdBy,
+      });
+    }
+  }
+  return newId;
 }
 
 export const api = {
@@ -88,6 +223,46 @@ export const api = {
         .from('space_links')
         .insert({ space_id: spaceId, linked_space_id: linkedSpaceId });
       if (error) throw error;
+    },
+    /**
+     * Semeia um Painel + Coluna + card de boas-vindas ("Comece por aqui") num
+     * Espaço recém-criado. Usa IDs explícitos + inserts diretos (return=minimal),
+     * como em `create`, para não esbarrar em RLS na linha recém-criada.
+     */
+    async seedWelcome(input: {
+      spaceId: string;
+      ownerId: string;
+      boardName: string;
+      columnTitle: string;
+      cardTitle: string;
+      cardBody: string;
+    }): Promise<void> {
+      const boardId = crypto.randomUUID();
+      const b = await supabase
+        .from('boards')
+        .insert({ id: boardId, space_id: input.spaceId, name: input.boardName, position: 0 });
+      if (b.error) throw b.error;
+
+      const columnId = crypto.randomUUID();
+      const c = await supabase.from('columns').insert({
+        id: columnId,
+        board_id: boardId,
+        space_id: input.spaceId,
+        title: input.columnTitle,
+        color: '#6366F1',
+        position: 0,
+      });
+      if (c.error) throw c.error;
+
+      const it = await supabase.from('items').insert({
+        column_id: columnId,
+        space_id: input.spaceId,
+        title: input.cardTitle,
+        description: input.cardBody,
+        position: 0,
+        created_by: input.ownerId,
+      });
+      if (it.error) throw it.error;
     },
   },
 
@@ -217,6 +392,11 @@ export const api = {
       const { error } = await supabase.from('boards').delete().eq('id', id);
       if (error) throw error;
     },
+    /** Configuração do relatório de Funil (campo de valor + papel das Colunas). */
+    async setReportConfig(id: string, config: ReportConfig | null): Promise<void> {
+      const { error } = await supabase.from('boards').update({ report_config: config }).eq('id', id);
+      if (error) throw error;
+    },
   },
 
   // ── Colunas ────────────────────────────────────────────────────────────
@@ -277,6 +457,7 @@ export const api = {
            item_assignees(user_id),
            item_labels(label_id),
            item_field_values(*),
+           organization:organizations(id, name),
            attachments(count),
            comments(count)`,
         )
@@ -284,6 +465,33 @@ export const api = {
         .order('position');
       if (error) throw error;
       return (data ?? []) as unknown as RawItem[];
+    },
+    /**
+     * Cards do Espaço com Término já passado — alimenta o sininho de avisos.
+     * Traz o Painel/Coluna junto para o aviso poder levar direto ao card.
+     * O filtro fino (dia inteiro + % concluído) fica no cliente, via
+     * `effectiveSchedule`, para bater com o semáforo do resto do app.
+     */
+    async listOverdue(spaceId: string): Promise<OverdueItem[]> {
+      const { data, error } = await supabase
+        .from('items')
+        .select(
+          `id, title, due_at, done_at, progress, checklists, schedule_tasks, column_id,
+           columns(id, title, board_id, boards(id, name))`,
+        )
+        .eq('space_id', spaceId)
+        .is('done_at', null) // card concluído na mão não gera aviso
+        .not('due_at', 'is', null)
+        .lte('due_at', new Date().toISOString())
+        .order('due_at');
+      if (error) throw error;
+
+      return (data ?? []).map((row: any) => ({
+        ...(row as Item),
+        boardId: row.columns?.board_id ?? null,
+        boardName: row.columns?.boards?.name ?? '',
+        columnTitle: row.columns?.title ?? '',
+      }));
     },
     /** Hidrata assignees/labels/contagens usando mapas do Espaço. */
     hydrate(
@@ -339,6 +547,16 @@ export const api = {
         checklists,
         position: (s.position ?? 0) + 0.5,
         due_at: s.due_at,
+        // Cronograma e CRM acompanham a cópia (mesmo Espaço).
+        start_at: s.start_at ?? null,
+        work_hours: s.work_hours ?? null,
+        cost: s.cost ?? null,
+        progress: s.progress ?? null,
+        schedule_mode: s.schedule_mode ?? null,
+        schedule_tasks: s.schedule_tasks ?? [],
+        schedule_calendar: s.schedule_calendar ?? null,
+        organization_id: s.organization_id ?? null,
+        contact_id: s.contact_id ?? null,
         created_by: createdBy,
       });
       if (ins.error) throw ins.error;
@@ -375,6 +593,38 @@ export const api = {
         }
       }
     },
+    /**
+     * Cards do Espaço que já têm cronograma de projeto — usado para copiar a
+     * estrutura de um projeto para outro sem redigitar.
+     */
+    async listWithSchedule(
+      spaceId: string,
+      exceptId?: string,
+    ): Promise<{ id: string; title: string; schedule_tasks: ScheduleTask[] }[]> {
+      const { data, error } = await supabase
+        .from('items')
+        .select('id, title, schedule_tasks')
+        .eq('space_id', spaceId)
+        .order('title');
+      if (error) throw error;
+      return (data ?? [])
+        .map((r: any) => ({
+          id: r.id as string,
+          title: r.title as string,
+          schedule_tasks: (r.schedule_tasks ?? []) as ScheduleTask[],
+        }))
+        .filter((r) => r.id !== exceptId && r.schedule_tasks.length > 0);
+    },
+    /** Copia o Item para outro Espaço interligado (só Administrador na prática — ver copyItemToSpace). */
+    async copyToSpace(input: { sourceId: string; targetSpaceId: string; targetColumnId: string; createdBy: string }): Promise<void> {
+      await copyItemToSpace(input);
+    },
+    /** Move o Item para outro Espaço interligado: copia e remove o original. */
+    async moveToSpace(input: { sourceId: string; targetSpaceId: string; targetColumnId: string; createdBy: string }): Promise<void> {
+      await copyItemToSpace(input);
+      const { error } = await supabase.from('items').delete().eq('id', input.sourceId);
+      if (error) throw error;
+    },
     async create(input: {
       columnId: string;
       spaceId: string;
@@ -394,6 +644,7 @@ export const api = {
         .select()
         .single();
       if (error) throw error;
+      itemsChanged();
       return data as Item;
     },
     async update(id: string, patch: Partial<Item>): Promise<void> {
@@ -403,16 +654,20 @@ export const api = {
       delete clean.field_values;
       delete clean.attachments;
       delete clean.comments;
+      delete clean.organization; // embed de leitura, não é coluna de `items`
       const { error } = await supabase.from('items').update(clean).eq('id', id);
       if (error) throw error;
+      itemsChanged();
     },
     async remove(id: string): Promise<void> {
       const { error } = await supabase.from('items').delete().eq('id', id);
       if (error) throw error;
+      itemsChanged();
     },
     async setColumn(id: string, columnId: string, position: number): Promise<void> {
       const { error } = await supabase.from('items').update({ column_id: columnId, position }).eq('id', id);
       if (error) throw error;
+      itemsChanged();
     },
     async reorder(orderedIds: string[]): Promise<void> {
       await Promise.all(
@@ -656,6 +911,322 @@ export const api = {
         .eq('user_id', userId);
       if (error) throw error;
       return (data ?? []).map((r: any) => r.column).filter(Boolean);
+    },
+  },
+
+  // ── CRM: Organizações ──────────────────────────────────────────────────
+  organizations: {
+    async list(spaceId: string): Promise<Organization[]> {
+      const { data, error } = await supabase
+        .from('organizations')
+        .select('*')
+        .eq('space_id', spaceId)
+        .order('name');
+      if (error) throw error;
+      return (data ?? []) as Organization[];
+    },
+    async create(
+      input: Omit<Organization, 'id' | 'created_at' | 'updated_at'>,
+    ): Promise<Organization> {
+      const id = crypto.randomUUID();
+      const { error } = await supabase.from('organizations').insert({ id, ...input });
+      if (error) throw error;
+      const { data, error: selErr } = await supabase
+        .from('organizations')
+        .select('*')
+        .eq('id', id)
+        .single();
+      if (selErr) throw selErr;
+      return data as Organization;
+    },
+    async update(id: string, patch: Partial<Organization>): Promise<void> {
+      const { error } = await supabase.from('organizations').update(patch).eq('id', id);
+      if (error) throw error;
+    },
+    async remove(id: string): Promise<void> {
+      const { error } = await supabase.from('organizations').delete().eq('id', id);
+      if (error) throw error;
+    },
+  },
+
+  // ── CRM: Pessoas de contato ────────────────────────────────────────────
+  contacts: {
+    async list(spaceId: string): Promise<Contact[]> {
+      const { data, error } = await supabase
+        .from('contacts')
+        .select('*')
+        .eq('space_id', spaceId)
+        .order('name');
+      if (error) throw error;
+      return (data ?? []) as Contact[];
+    },
+    async create(input: Omit<Contact, 'id' | 'created_at' | 'updated_at'>): Promise<Contact> {
+      const id = crypto.randomUUID();
+      const { error } = await supabase.from('contacts').insert({ id, ...input });
+      if (error) throw error;
+      const { data, error: selErr } = await supabase
+        .from('contacts')
+        .select('*')
+        .eq('id', id)
+        .single();
+      if (selErr) throw selErr;
+      return data as Contact;
+    },
+    async update(id: string, patch: Partial<Contact>): Promise<void> {
+      const { error } = await supabase.from('contacts').update(patch).eq('id', id);
+      if (error) throw error;
+    },
+    async remove(id: string): Promise<void> {
+      const { error } = await supabase.from('contacts').delete().eq('id', id);
+      if (error) throw error;
+    },
+  },
+
+  // ── Recursos (pessoas + custo/hora) ────────────────────────────────────
+  resources: {
+    async list(spaceId: string): Promise<Resource[]> {
+      const { data, error } = await supabase
+        .from('resources')
+        .select('*')
+        .eq('space_id', spaceId)
+        .order('name');
+      if (error) throw error;
+      return (data ?? []) as Resource[];
+    },
+    async create(input: Omit<Resource, 'id' | 'created_at' | 'updated_at'>): Promise<Resource> {
+      const id = crypto.randomUUID();
+      const { error } = await supabase.from('resources').insert({ id, ...input });
+      if (error) throw error;
+      const { data, error: selErr } = await supabase
+        .from('resources')
+        .select('*')
+        .eq('id', id)
+        .single();
+      if (selErr) throw selErr;
+      return data as Resource;
+    },
+    async update(id: string, patch: Partial<Resource>): Promise<void> {
+      const { error } = await supabase.from('resources').update(patch).eq('id', id);
+      if (error) throw error;
+    },
+    async remove(id: string): Promise<void> {
+      const { error } = await supabase.from('resources').delete().eq('id', id);
+      if (error) throw error;
+    },
+  },
+
+  // ── Templates de Painel ────────────────────────────────────────────────
+  templates: {
+    /**
+     * Cria um Painel completo a partir de um template: colunas, etiquetas,
+     * campos personalizados e cards de exemplo.
+     * Etiquetas e campos que já existam no Espaço (mesmo nome) são
+     * reaproveitados — nunca duplicados. Se o usuário não tiver permissão
+     * para criar etiquetas/campos, o Painel e as colunas são criados mesmo
+     * assim (a parte opcional é simplesmente ignorada).
+     * Devolve o id do Painel criado.
+     */
+    async apply(input: {
+      spaceId: string;
+      userId: string;
+      def: TemplateDef;
+      boardPosition: number;
+    }): Promise<string> {
+      const { spaceId, userId, def } = input;
+
+      // 1) Painel
+      const boardId = crypto.randomUUID();
+      const b = await supabase
+        .from('boards')
+        .insert({ id: boardId, space_id: spaceId, name: def.boardName, position: input.boardPosition });
+      if (b.error) throw b.error;
+
+      // 2) Colunas
+      const columnIds: string[] = [];
+      for (let i = 0; i < def.columns.length; i++) {
+        const id = crypto.randomUUID();
+        const c = await supabase.from('columns').insert({
+          id,
+          board_id: boardId,
+          space_id: spaceId,
+          title: def.columns[i].title,
+          color: def.columns[i].color,
+          position: i,
+        });
+        if (c.error) throw c.error;
+        columnIds.push(id);
+      }
+
+      // 3) Etiquetas do Espaço (reaproveita por nome)
+      const labelIdByName = new Map<string, string>();
+      const { data: existingLabels } = await supabase.from('labels').select('id, name').eq('space_id', spaceId);
+      (existingLabels ?? []).forEach((l: any) => labelIdByName.set(String(l.name).toLowerCase(), l.id));
+      for (const lb of def.labels) {
+        const key = lb.name.toLowerCase();
+        if (labelIdByName.has(key)) continue;
+        const id = crypto.randomUUID();
+        const r = await supabase.from('labels').insert({ id, space_id: spaceId, name: lb.name, color: lb.color });
+        if (!r.error) labelIdByName.set(key, id);
+      }
+
+      // 4) Campos personalizados do Espaço (reaproveita por nome)
+      const { data: existingFields } = await supabase
+        .from('custom_field_defs')
+        .select('id, name')
+        .eq('space_id', spaceId);
+      const fieldIdByName = new Map<string, string>();
+      (existingFields ?? []).forEach((f: any) => fieldIdByName.set(String(f.name).toLowerCase(), f.id));
+      let fieldPosition = existingFields?.length ?? 0;
+      for (const f of def.fields) {
+        const key = f.name.toLowerCase();
+        if (fieldIdByName.has(key)) continue;
+        const id = crypto.randomUUID();
+        const r = await supabase.from('custom_field_defs').insert({
+          id,
+          space_id: spaceId,
+          name: f.name,
+          type: f.type,
+          config: {
+            ...(f.options ? { options: f.options } : {}),
+            ...(f.money ? { money: true } : {}),
+          },
+          show_on_face_default: f.showOnFace,
+          position: fieldPosition++,
+        });
+        if (!r.error) fieldIdByName.set(key, id);
+      }
+
+      // 4b) Cadastros de CRM de exemplo (Organização + Pessoa de contato).
+      // Reaproveita por nome, igual às etiquetas — aplicar o template duas
+      // vezes não duplica os cadastros.
+      const orgIds: (string | null)[] = [];
+      if (def.organizations?.length) {
+        const { data: existingOrgs } = await supabase
+          .from('organizations')
+          .select('id, name')
+          .eq('space_id', spaceId);
+        const orgIdByName = new Map<string, string>();
+        (existingOrgs ?? []).forEach((o: any) => orgIdByName.set(String(o.name).toLowerCase(), o.id));
+
+        for (const org of def.organizations) {
+          const key = org.name.toLowerCase();
+          const found = orgIdByName.get(key);
+          if (found) {
+            orgIds.push(found);
+            continue;
+          }
+          const id = crypto.randomUUID();
+          const r = await supabase.from('organizations').insert({
+            id,
+            space_id: spaceId,
+            name: org.name,
+            fantasy_name: org.fantasy_name ?? null,
+            cnpj: org.cnpj ?? null,
+            status: org.status ?? null,
+            system: org.system ?? null,
+            segment: org.segment ?? null,
+            created_by: userId,
+          });
+          orgIds.push(r.error ? null : id);
+          if (!r.error) orgIdByName.set(key, id);
+        }
+      }
+
+      const contactIds: (string | null)[] = [];
+      if (def.contacts?.length) {
+        const { data: existingContacts } = await supabase
+          .from('contacts')
+          .select('id, name')
+          .eq('space_id', spaceId);
+        const contactIdByName = new Map<string, string>();
+        (existingContacts ?? []).forEach((c: any) => contactIdByName.set(String(c.name).toLowerCase(), c.id));
+
+        for (const contact of def.contacts) {
+          const key = contact.name.toLowerCase();
+          const found = contactIdByName.get(key);
+          if (found) {
+            contactIds.push(found);
+            continue;
+          }
+          const id = crypto.randomUUID();
+          const r = await supabase.from('contacts').insert({
+            id,
+            space_id: spaceId,
+            organization_id:
+              contact.organizationIndex === undefined ? null : orgIds[contact.organizationIndex] ?? null,
+            name: contact.name,
+            phone: contact.phone ?? null,
+            phone_type: contact.phone_type ?? null,
+            email: contact.email ?? null,
+            email_type: contact.email_type ?? null,
+            created_by: userId,
+          });
+          contactIds.push(r.error ? null : id);
+          if (!r.error) contactIdByName.set(key, id);
+        }
+      }
+
+      // 5) Cards de exemplo
+      for (let i = 0; i < def.cards.length; i++) {
+        const card = def.cards[i];
+        const itemId = crypto.randomUUID();
+        const checklists = card.checklist
+          ? [
+              {
+                id: crypto.randomUUID(),
+                title: card.checklist.title,
+                items: card.checklist.items.map((text) => ({ id: crypto.randomUUID(), text, done: false })),
+              },
+            ]
+          : [];
+        // O cronograma modelo já define o Início/Término do card — é o
+        // "término previsto" do projeto, que aparece na face do card.
+        const scheduleTasks = buildTemplateSchedule(card.schedule);
+        const span = rollupTasks(scheduleTasks);
+
+        const r = await supabase.from('items').insert({
+          id: itemId,
+          column_id: columnIds[card.columnIndex] ?? columnIds[0],
+          space_id: spaceId,
+          title: card.title,
+          description: card.description ?? '',
+          checklists,
+          schedule_tasks: scheduleTasks,
+          start_at: scheduleTasks.length ? span.start : null,
+          due_at: scheduleTasks.length ? span.end : null,
+          organization_id:
+            card.organizationIndex === undefined ? null : orgIds[card.organizationIndex] ?? null,
+          contact_id: card.contactIndex === undefined ? null : contactIds[card.contactIndex] ?? null,
+          position: i,
+          created_by: userId,
+        });
+        if (r.error) continue;
+
+        const labelIds = (card.labelIndexes ?? [])
+          .map((idx) => labelIdByName.get(def.labels[idx]?.name.toLowerCase() ?? ''))
+          .filter(Boolean) as string[];
+        if (labelIds.length) {
+          await supabase.from('item_labels').insert(labelIds.map((label_id) => ({ item_id: itemId, label_id })));
+        }
+
+        // Valores de exemplo dos campos personalizados.
+        const values = Object.entries(card.fieldValues ?? {})
+          .map(([index, value]) => {
+            const field = def.fields[Number(index)];
+            const fieldDefId = field && fieldIdByName.get(field.name.toLowerCase());
+            if (!fieldDefId) return null;
+            return {
+              item_id: itemId,
+              field_def_id: fieldDefId,
+              value,
+              show_on_face: field.showOnFace,
+            };
+          })
+          .filter((v): v is NonNullable<typeof v> => v !== null);
+        if (values.length) await supabase.from('item_field_values').insert(values);
+      }
+
+      return boardId;
     },
   },
 };
