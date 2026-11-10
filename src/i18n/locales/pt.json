@@ -599,5 +599,10 @@
     "privacy": "Política de Privacidade",
     "consentBefore": "Ao criar sua conta, você concorda com os",
     "consentAnd": "e com a"
+  },
+  "update": {
+    "title": "Nova versão disponível",
+    "hint": "Recarregue para usar a versão mais recente.",
+    "action": "Atualizar"
   }
 }

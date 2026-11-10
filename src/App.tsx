@@ -14,6 +14,7 @@ import { ProfilePage } from './features/profile/ProfilePage';
 import { LandingPage } from './features/landing/LandingPage';
 import { useAuth } from './contexts/AuthContext';
 import { FullPageSpinner } from './components/Spinner';
+import { UpdatePrompt } from './components/UpdatePrompt';
 
 /**
  * Raiz do site. Quem não está autenticado vê a página de apresentação
@@ -30,6 +31,7 @@ export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
+        <UpdatePrompt />
         <Routes>
           {/* Público */}
           <Route path="/login" element={<LoginPage />} />

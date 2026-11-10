@@ -16,7 +16,7 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       includeAssets: ['favicon.svg', 'robots.txt', 'icons/*.png', 'icons/*.svg'],
       manifest: {
         name: 'PERSONTASK — Gestão de Tarefas e Pessoas',
