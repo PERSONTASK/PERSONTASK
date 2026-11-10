@@ -107,7 +107,8 @@
     <div class="brandmark">PERSON·TASK</div>
     <span class="badge">🔒 Documento interno · confidencial</span>
     <h1>Manual de Operações Interno</h1>
-    <p>O guia do dono: como o PERSONTASK é montado, como publicar novas versões, gerenciar planos, e-mails, domínio e resolver problemas. <strong>Não publique este arquivo</strong> — é só para uso administrativo.</p>
+    <p>O guia do dono: como o PERSONTASK é montado, como publicar, onde mexer em cada painel e o que fazer quando algo quebra. <strong>Não publique este arquivo</strong> — ele fica em <span class="mono">docs/</span>, fora da pasta que vai para o site.</p>
+    <p style="margin-top:10px;font-size:13px;opacity:.85">Revisado em 10 de novembro de 2026</p>
   </div>
 </div>
 
@@ -115,247 +116,364 @@
   <nav class="toc">
     <h4>Conteúdo</h4>
     <div class="toc-links">
-      <a href="#s1"><span class="n">1</span> Arquitetura</a>
+      <a href="#s1"><span class="n">1</span> As peças</a>
       <a href="#s2"><span class="n">2</span> Painéis de admin</a>
       <a href="#s3"><span class="n">3</span> Publicar (deploy)</a>
-      <a href="#s4"><span class="n">4</span> Planos Free/Premium</a>
+      <a href="#s4"><span class="n">4</span> Banco &amp; migrações</a>
       <a href="#s5"><span class="n">5</span> E-mails</a>
-      <a href="#s6"><span class="n">6</span> Domínio &amp; DNS</a>
-      <a href="#s7"><span class="n">7</span> Autenticação</a>
-      <a href="#s8"><span class="n">8</span> Banco &amp; segurança</a>
-      <a href="#s9"><span class="n">9</span> Functions &amp; Cron</a>
-      <a href="#s10"><span class="n">10</span> Playbook</a>
-      <a href="#s11"><span class="n">11</span> Problemas</a>
-      <a href="#s12"><span class="n">12</span> Custos</a>
-      <a href="#s13"><span class="n">13</span> Segredos</a>
+      <a href="#s6"><span class="n">6</span> Autenticação</a>
+      <a href="#s7"><span class="n">7</span> Domínio &amp; DNS</a>
+      <a href="#s8"><span class="n">8</span> Planos</a>
+      <a href="#s9"><span class="n">9</span> Playbook</a>
+      <a href="#s10"><span class="n">10</span> Quando quebra</a>
+      <a href="#s11"><span class="n">11</span> Custos &amp; limites</a>
+      <a href="#s12"><span class="n">12</span> Segredos</a>
+      <a href="#s13"><span class="n">13</span> Mapa do código</a>
     </div>
   </nav>
 
   <main>
 
+    <!-- 1 ─────────────────────────────────────────────────────────── -->
     <section class="doc" id="s1">
-      <div class="sec-head"><div class="sec-num">1</div><h2>Arquitetura — as peças</h2></div>
-      <p>O PERSONTASK é um app <strong>web (React)</strong> hospedado como site estático, que fala com o <strong>Supabase</strong> (banco, login, arquivos, funções) e envia e-mails pelo <strong>Resend</strong>. O domínio próprio aponta para a hospedagem.</p>
-      <div class="arch">
-        <div class="box"><span class="tag">Frontend</span><b>React + Vite</b><span>Interface (PT/EN/ES), PWA. Hospedado no Netlify.</span></div>
-        <div class="box"><span class="tag">Backend</span><b>Supabase</b><span>Postgres + Auth + Storage + RLS + Edge Functions.</span></div>
-        <div class="box"><span class="tag">E-mails</span><b>Resend</b><span>Avisos do app (API) e e-mails do Auth (SMTP).</span></div>
-        <div class="box"><span class="tag">Domínio</span><b>Locaweb → Netlify</b><span>persontask.com.br (DNS na Locaweb, HTTPS pelo Netlify).</span></div>
+      <div class="sec-head"><div class="sec-num">1</div><h2>As peças</h2></div>
+      <p>Cinco serviços sustentam o PERSONTASK. Se um cair, você precisa saber qual.</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Peça</th><th>O que faz</th><th>Onde</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Cloudflare</strong></td><td>Hospeda o site e publica a cada envio para o GitHub.</td><td><span class="mono">dash.cloudflare.com</span></td></tr>
+            <tr><td><strong>GitHub</strong></td><td>Guarda o código. Publicar = enviar para a branch <span class="mono">main</span>.</td><td><span class="mono">github.com/PERSONTASK/PERSONTASK</span> (privado)</td></tr>
+            <tr><td><strong>Supabase</strong></td><td>Banco de dados, login, arquivos anexados e as funções que enviam e-mail.</td><td>projeto <span class="mono">wogilvheyciprqqkprol</span>, região São Paulo</td></tr>
+            <tr><td><strong>Resend</strong></td><td>Entrega os e-mails automáticos.</td><td><span class="mono">resend.com</span> · domínio verificado</td></tr>
+            <tr><td><strong>Locaweb</strong></td><td>Registro e DNS do domínio <span class="mono">persontask.com.br</span>.</td><td>painel da Locaweb</td></tr>
+          </tbody>
+        </table>
       </div>
-      <div class="tbl-wrap"><table>
-        <thead><tr><th>Camada</th><th>Tecnologia</th><th>Observação</th></tr></thead>
-        <tbody>
-          <tr><td>Interface</td><td>React + TypeScript + Vite + Tailwind</td><td>Código em <code>persontask-app/src</code></td></tr>
-          <tr><td>Hospedagem</td><td>Netlify</td><td>Site <code>persontask</code> · deploy por arrastar a pasta <code>dist</code></td></tr>
-          <tr><td>Banco / Login / Arquivos</td><td>Supabase (ref <code>wogilvheyciprqqkprol</code>)</td><td>Postgres com RLS por Espaço</td></tr>
-          <tr><td>E-mails transacionais</td><td>Resend (domínio verificado)</td><td>Remetente <code>no-reply@persontask.com.br</code></td></tr>
-          <tr><td>Código-fonte</td><td>GitHub <code>PERSONTASK/PERSONTASK</code> (privado)</td><td>Branch <code>main</code></td></tr>
-        </tbody>
-      </table></div>
+      <div class="note tip"><span class="ic">🧩</span><p>O site é <strong>estático</strong>: HTML, CSS e JavaScript servidos pela borda do Cloudflare. Não existe servidor de aplicação. Tudo que precisa de servidor — login, banco, e-mail — mora no Supabase.</p></div>
+      <div class="note warn"><span class="ic">🚚</span><p><strong>O domínio ainda está no Netlify.</strong> O app novo roda em <span class="mono">persontask.joabe-reis2.workers.dev</span>. O <span class="mono">persontask.com.br</span> continua apontando para o Netlify até a troca de DNS — veja a seção 7.</p></div>
     </section>
 
+    <!-- 2 ─────────────────────────────────────────────────────────── -->
     <section class="doc" id="s2">
-      <div class="sec-head"><div class="sec-num">2</div><h2>Painéis de administração (onde mexer)</h2></div>
-      <p>Você administra tudo por estes painéis. Guarde os logins com segurança (idealmente num gerenciador de senhas).</p>
-      <div class="tbl-wrap"><table>
-        <thead><tr><th>Serviço</th><th>Para quê</th><th>Onde</th></tr></thead>
-        <tbody>
-          <tr><td><strong>Netlify</strong></td><td>Publicar o site, domínio, HTTPS</td><td>app.netlify.com → site <code>persontask</code></td></tr>
-          <tr><td><strong>Supabase</strong></td><td>Banco, usuários, login, funções, logs, planos</td><td>supabase.com/dashboard</td></tr>
-          <tr><td><strong>Resend</strong></td><td>Envio de e-mails, logs de entrega, domínio, API keys</td><td>resend.com</td></tr>
-          <tr><td><strong>Locaweb</strong></td><td>Domínio e DNS (registros)</td><td>painel.locaweb.com.br</td></tr>
-          <tr><td><strong>Google Cloud</strong></td><td>Credenciais do login com Google (OAuth)</td><td>console.cloud.google.com</td></tr>
-          <tr><td><strong>GitHub</strong></td><td>Código-fonte (backup e versões)</td><td>github.com/PERSONTASK/PERSONTASK</td></tr>
-          <tr><td><strong>Gmail</strong></td><td>Caixa de contato humana</td><td>contato.persontask@gmail.com</td></tr>
-        </tbody>
-      </table></div>
+      <div class="sec-head"><div class="sec-num">2</div><h2>Painéis de administração</h2></div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Preciso…</th><th>Vá em</th></tr></thead>
+          <tbody>
+            <tr><td>Ver se o último deploy passou</td><td>Cloudflare → Compute → Workers &amp; Pages → <span class="mono">persontask</span> → Deployments</td></tr>
+            <tr><td>Mudar variável de build</td><td>Cloudflare → o projeto → Settings → Variables</td></tr>
+            <tr><td>Rodar SQL no banco</td><td>Supabase → SQL Editor</td></tr>
+            <tr><td>Ver/editar dados de um usuário</td><td>Supabase → Table Editor</td></tr>
+            <tr><td>Liberar um endereço para login</td><td>Supabase → Authentication → URL Configuration</td></tr>
+            <tr><td>Ver por que um e-mail não chegou</td><td>Supabase → Edge Functions → a função → aba <strong>Logs</strong></td></tr>
+            <tr><td>Ver se o Resend entregou</td><td>Resend → Emails</td></tr>
+            <tr><td>Mexer no DNS do domínio</td><td>Locaweb → Zona DNS</td></tr>
+            <tr><td>Login pelo Google</td><td>Google Cloud Console → APIs &amp; Serviços → Credenciais</td></tr>
+          </tbody>
+        </table>
+      </div>
     </section>
 
+    <!-- 3 ─────────────────────────────────────────────────────────── -->
     <section class="doc" id="s3">
-      <div class="sec-head"><div class="sec-num">3</div><h2>Publicar uma nova versão (deploy)</h2></div>
-      <p>O deploy é <strong>manual</strong> (arrastar a pasta). Sempre que o código mudar, gere a build e envie ao Netlify.</p>
-      <h3>1. Gerar a build</h3>
-      <p>Abra o terminal (Git Bash) na pasta do app e rode:</p>
-      <pre>export PATH="/c/Program Files/nodejs:$PATH"   # deixa o Node acessível
-cd /c/Users/User/persontask-app
-npm run build                                 # gera a pasta dist/</pre>
-      <p>Isso cria/atualiza a pasta <code>persontask-app/dist</code>.</p>
-      <h3>2. Enviar ao Netlify</h3>
-      <ol class="num">
-        <li>Acesse o Netlify → site <strong>persontask</strong> → aba <strong>Deploys</strong>.</li>
-        <li>Arraste a pasta <code>dist</code> inteira para a área de <em>drag &amp; drop</em>.</li>
-        <li>Espere aparecer <strong>Published</strong>.</li>
-        <li>No site, dê <span class="kbd">Ctrl</span>+<span class="kbd">F5</span> (o PWA atualiza sozinho no próximo acesso).</li>
+      <div class="sec-head"><div class="sec-num">3</div><h2>Publicar uma nova versão</h2></div>
+      <p>Não existe mais arrastar pasta. O fluxo é um só:</p>
+      <ol class="steps">
+        <li>Testar localmente: <span class="kbd">npm run dev</span> e abrir <span class="mono">localhost:5173</span>.</li>
+        <li>Conferir que compila: <span class="kbd">npm run build</span>.</li>
+        <li>Enviar: <span class="kbd">git add -A</span> → <span class="kbd">git commit -m "o que mudou"</span> → <span class="kbd">git push origin main</span>.</li>
+        <li>O Cloudflare detecta o envio e publica sozinho, em 2 a 3 minutos.</li>
       </ol>
-      <div class="note tip"><span class="ic">✔️</span><p>Para conferir se a versão nova subiu <em>sem depender de cache</em>: o nome do arquivo JS muda a cada build (ex.: <code>assets/index-XXXX.js</code>). Se o arquivo no ar tem hash novo, publicou.</p></div>
-      <div class="note tip"><span class="ic">💡</span><p>O manual do usuário (<code>manual.html</code>) e o PDF ficam em <code>persontask-app/public</code> e vão junto na build. Este manual interno fica em <code>docs/</code> e <strong>não</strong> é publicado.</p></div>
+      <div class="note warn"><span class="ic">💻</span><p>No PowerShell do Windows, <strong><span class="mono">&amp;&amp;</span> não funciona</strong> para encadear comandos — use ponto e vírgula:<br><span class="kbd">cd C:\Users\User\persontask-app; git push origin main</span></p></div>
+      <h3>O que o Cloudflare faz</h3>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Configuração</th><th>Valor</th></tr></thead>
+          <tbody>
+            <tr><td>Build command</td><td><span class="mono">npm run build</span></td></tr>
+            <tr><td>Deploy command</td><td><span class="mono">npx wrangler deploy</span></td></tr>
+            <tr><td>Node</td><td>20, lido do arquivo <span class="mono">.nvmrc</span></td></tr>
+            <tr><td>Variáveis de build</td><td><span class="mono">VITE_SUPABASE_URL</span>, <span class="mono">VITE_SUPABASE_ANON_KEY</span></td></tr>
+            <tr><td>Onde está o site</td><td><span class="mono">dist</span>, declarado no <span class="mono">wrangler.jsonc</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note tip"><span class="ic">🔁</span><p><strong>Reverter uma versão ruim:</strong> Cloudflare → Deployments → escolha um deploy anterior → <em>Rollback</em>. Leva segundos e não depende de mexer no código.</p></div>
+      <div class="note danger"><span class="ic">🚫</span><p><strong>Nunca adicione o arquivo <span class="mono">public/_redirects</span> de volta.</strong> O Cloudflare o lê e rejeita o deploy com "laço infinito" (código 100324). Quem faz a regra de rota única aqui é o <span class="mono">not_found_handling</span> do <span class="mono">wrangler.jsonc</span>.</p></div>
     </section>
 
+    <!-- 4 ─────────────────────────────────────────────────────────── -->
     <section class="doc" id="s4">
-      <div class="sec-head"><div class="sec-num">4</div><h2>Planos: Grátis e Premium</h2></div>
-      <p>Ainda <strong>não há cobrança automática</strong>. O plano de cada usuário fica no campo <code>plan</code> da tabela <code>profiles</code> (valores: <code>free</code> ou <code>premium</code>).</p>
-      <h3>Dar Premium a um cliente (manual)</h3>
-      <ol class="num">
-        <li>Supabase → <strong>Table Editor</strong> → tabela <code>profiles</code>.</li>
-        <li>Ache a linha do usuário (pela coluna <code>email</code>).</li>
-        <li>Mude <code>plan</code> de <code>free</code> para <code>premium</code> e salve.</li>
-        <li>O usuário vê os recursos Premium liberados no próximo carregamento.</li>
-      </ol>
-      <div class="tbl-wrap"><table>
-        <thead><tr><th>Recurso</th><th>Grátis</th><th>Premium</th></tr></thead>
-        <tbody>
-          <tr><td>Espaços</td><td>1</td><td>Vários</td></tr>
-          <tr><td>Painéis por Espaço</td><td>1</td><td>Vários</td></tr>
-          <tr><td>Imagem de fundo, fonte, cor de coluna, logo</td><td>—</td><td>Sim</td></tr>
-          <tr><td>Espaços interligados</td><td>—</td><td>Sim</td></tr>
-        </tbody>
-      </table></div>
-      <div class="note tip"><span class="ic">💳</span><p>Quando quiser cobrança automática (Stripe/gateway), dá para plugar depois — o campo <code>plan</code> já é o "interruptor" que o app lê.</p></div>
+      <div class="sec-head"><div class="sec-num">4</div><h2>Banco de dados e migrações</h2></div>
+      <p>Toda mudança de estrutura do banco está em arquivos <span class="mono">.sql</span> na pasta <span class="mono">supabase/</span>. Todos são <strong>idempotentes</strong>: rodar duas vezes não quebra nada.</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Arquivo</th><th>O que criou</th></tr></thead>
+          <tbody>
+            <tr><td><span class="mono">schema.sql</span></td><td>A base: Espaços, Painéis, Colunas, Itens, membros, permissões, anexos.</td></tr>
+            <tr><td><span class="mono">crm.sql</span></td><td>Organizações e pessoas de contato.</td></tr>
+            <tr><td><span class="mono">schedule.sql</span></td><td>Campos de cronograma no card.</td></tr>
+            <tr><td><span class="mono">project-schedule.sql</span></td><td>As tarefas do cronograma dentro do card.</td></tr>
+            <tr><td><span class="mono">resources-calendar.sql</span></td><td>Recursos com custo/hora e calendário de dias úteis.</td></tr>
+            <tr><td><span class="mono">done.sql</span></td><td>Card concluído.</td></tr>
+            <tr><td><span class="mono">reports.sql</span></td><td>Moeda do Espaço e configuração do relatório.</td></tr>
+            <tr><td><span class="mono">migrate-keep.sql</span></td><td>Padrão ao migrar card entre Espaços.</td></tr>
+            <tr><td><span class="mono">cron.sql</span></td><td>O agendamento diário do aviso de vencimento.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Como rodar</h3>
+      <p>Supabase → <strong>SQL Editor</strong> → New query → colar o conteúdo do arquivo → <strong>Run</strong>.</p>
+      <div class="note danger"><span class="ic">⚠️</span><p><strong>Código novo que depende de coluna nova quebra se o SQL não for rodado antes.</strong> Já aconteceu duas vezes: o sininho ficava vazio e o botão Concluir não gravava. Regra: <strong>rode o SQL primeiro, publique depois</strong>.</p></div>
+      <h3>Segurança — por que um usuário não vê o Espaço do outro</h3>
+      <p>Não é o código do site que impede: é o próprio banco. Cada tabela tem regras de <em>Row Level Security</em> que só liberam a linha se a pessoa for membro daquele Espaço. Mesmo que alguém chame a API direto, não passa.</p>
+      <h3>Backup</h3>
+      <div class="note warn"><span class="ic">💾</span><p>O plano gratuito do Supabase faz backup diário com retenção curta. Se o PERSONTASK virar receita, <strong>vale subir de plano por causa do backup</strong>, não por causa do tamanho. Enquanto isso, o Table Editor exporta cada tabela em CSV.</p></div>
     </section>
 
+    <!-- 5 ─────────────────────────────────────────────────────────── -->
     <section class="doc" id="s5">
       <div class="sec-head"><div class="sec-num">5</div><h2>E-mails</h2></div>
-      <p>Há <strong>dois caminhos</strong> de e-mail, os dois pelo Resend, do domínio verificado:</p>
-      <div class="tbl-wrap"><table>
-        <thead><tr><th>Tipo</th><th>Como sai</th><th>Quais</th></tr></thead>
-        <tbody>
-          <tr><td>Avisos do app</td><td>Edge Functions → Resend <strong>API</strong></td><td>Item atribuído, vencimento (cron), menção, convite</td></tr>
-          <tr><td>E-mails de conta</td><td>Supabase Auth → Resend <strong>SMTP</strong></td><td>Reset de senha, confirmação, magic link, troca de e-mail</td></tr>
-        </tbody>
-      </table></div>
-      <h3>Configurações-chave</h3>
-      <ul class="clean">
-        <li><strong>Remetente:</strong> <code>no-reply@persontask.com.br</code>.</li>
-        <li><strong>SMTP (Supabase → Authentication → Emails → SMTP):</strong> host <code>smtp.resend.com</code>, porta <code>465</code>, usuário <code>resend</code> (minúsculo!), senha = <em>Resend API key</em>.</li>
-        <li><strong>Secrets das Functions (Supabase → Edge Functions → Secrets):</strong> <code>RESEND_API_KEY</code>, <code>EMAIL_FROM</code>, <code>APP_URL=https://persontask.com.br</code>.</li>
-        <li><strong>Templates PT:</strong> em <code>supabase/email-templates/</code> — colar em Authentication → Emails → Templates.</li>
+      <p>São dois caminhos diferentes, e confundi-los custa tempo quando algo falha:</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Caminho</th><th>Quais e-mails</th><th>Depende de</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Edge Functions → Resend API</strong></td><td>Atribuição, menção, vencimento e convite.</td><td>Segredo <span class="mono">RESEND_API_KEY</span></td></tr>
+            <tr><td><strong>Supabase Auth → Resend SMTP</strong></td><td>Recuperar senha, confirmar cadastro.</td><td>Configuração SMTP no Supabase</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Configuração do SMTP</h3>
+      <div class="tbl-wrap">
+        <table>
+          <tbody>
+            <tr><td>Host</td><td><span class="mono">smtp.resend.com</span></td></tr>
+            <tr><td>Porta</td><td><span class="mono">465</span></td></tr>
+            <tr><td>Usuário</td><td><span class="mono">resend</span> — <strong>tudo minúsculo</strong></td></tr>
+            <tr><td>Senha</td><td>a chave de API do Resend</td></tr>
+            <tr><td>Remetente</td><td><span class="mono">no-reply@persontask.com.br</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note danger"><span class="ic">🔑</span><p><strong>O erro que mais custou tempo:</strong> escrever <span class="mono">Resend</span> com R maiúsculo no usuário do SMTP. A autenticação falha em silêncio e nada aparece nem no log do Resend. Tem que ser <span class="mono">resend</span>.</p></div>
+      <h3>Segredos das funções</h3>
+      <p>Supabase → Edge Functions → Secrets. São três:</p>
+      <ul>
+        <li><span class="mono">RESEND_API_KEY</span> — a chave de envio.</li>
+        <li><span class="mono">EMAIL_FROM</span> — <span class="mono">PERSONTASK &lt;no-reply@persontask.com.br&gt;</span></li>
+        <li><span class="mono">APP_URL</span> — <span class="mono">https://persontask.com.br</span>, usado nos links dentro dos e-mails.</li>
       </ul>
-      <h3>Ver se um e-mail saiu</h3>
-      <p>Abra <strong>Resend → Emails</strong>: cada envio aparece com status (<em>Delivered / Bounced</em>). Se não aparece nada, o e-mail não chegou ao Resend (config de SMTP ou a ação não disparou).</p>
-      <div class="note warn"><span class="ic">📬</span><p>Domínio novo pode cair no <strong>spam</strong> no começo. Está tudo autenticado (SPF/DKIM/DMARC PASS) — é só reputação. Marcar "não é spam" acelera o aquecimento.</p></div>
+      <div class="note danger"><span class="ic">💣</span><p><strong>Rotacionar a chave do Resend quebra os e-mails do app</strong> e o sintoma engana: a função responde <span class="mono">200</span> como se tivesse dado certo. O erro real (<span class="mono">401 API key is invalid</span>) só aparece na aba <strong>Logs</strong> da função — não em Invocations. Se trocar a chave em algum lugar, <strong>troque no Secrets também</strong>.</p></div>
+      <div class="note warn"><span class="ic">🔗</span><p>Se o <span class="mono">APP_URL</span> ficar vazio, os links dentro dos e-mails apontam para <span class="mono">localhost</span> e ninguém consegue abrir. Já aconteceu.</p></div>
     </section>
 
+    <!-- 6 ─────────────────────────────────────────────────────────── -->
     <section class="doc" id="s6">
-      <div class="sec-head"><div class="sec-num">6</div><h2>Domínio &amp; DNS (Locaweb)</h2></div>
-      <p>O domínio <code>persontask.com.br</code> foi registrado na Locaweb, e o DNS aponta para o Netlify e o Resend.</p>
-      <div class="tbl-wrap"><table>
-        <thead><tr><th>Tipo</th><th>Nome</th><th>Valor</th><th>Para quê</th></tr></thead>
-        <tbody>
-          <tr><td>A</td><td><code>@</code></td><td><code>75.2.60.5</code></td><td>Site (Netlify)</td></tr>
-          <tr><td>CNAME</td><td><code>www</code></td><td><code>persontask.netlify.app</code></td><td>www → site</td></tr>
-          <tr><td>TXT</td><td><code>resend._domainkey</code></td><td>(chave DKIM)</td><td>Autenticação de e-mail</td></tr>
-          <tr><td>CNAME</td><td><code>rsend</code> / <code>send</code></td><td><code>*.forge.rmta.net</code></td><td>Envio (Resend/SPF)</td></tr>
-          <tr><td>TXT</td><td><code>_dmarc</code></td><td><code>v=DMARC1; p=none;</code></td><td>Política DMARC</td></tr>
-        </tbody>
-      </table></div>
-      <div class="note danger"><span class="ic">🚫</span><p><strong>Não mexa nos registros MX</strong> nem apague os de e-mail sem necessidade — é o que autentica seus envios. O HTTPS é renovado sozinho pelo Netlify.</p></div>
+      <div class="sec-head"><div class="sec-num">6</div><h2>Autenticação</h2></div>
+      <p>Dois jeitos de entrar: e-mail com senha, ou conta Google.</p>
+      <h3>A lista de endereços permitidos</h3>
+      <p>Supabase → Authentication → <strong>URL Configuration</strong>. O <strong>Site URL</strong> é o destino padrão; os <strong>Redirect URLs</strong> são os endereços para onde o login pode devolver a pessoa.</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Campo</th><th>Valor atual</th></tr></thead>
+          <tbody>
+            <tr><td>Site URL</td><td><span class="mono">https://persontask.com.br</span></td></tr>
+            <tr><td rowspan="4">Redirect URLs</td><td><span class="mono">https://persontask.com.br/**</span></td></tr>
+            <tr><td><span class="mono">https://persontask.netlify.app/**</span></td></tr>
+            <tr><td><span class="mono">https://persontask.joabe-reis2.workers.dev/**</span></td></tr>
+            <tr><td><span class="mono">http://localhost:5173/**</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note danger"><span class="ic">🎯</span><p><strong>Sintoma clássico:</strong> você entra pelo Google num endereço novo e o navegador te joga no <span class="mono">persontask.com.br</span>. Causa: aquele endereço não está nos Redirect URLs, então o Supabase ignora o destino pedido e manda para o Site URL. <strong>Solução:</strong> acrescentar o endereço com <span class="mono">/**</span> no fim.</p></div>
+      <h3>Google Cloud Console</h3>
+      <div class="note warn"><span class="ic">🧠</span><p>Confusão fácil: o endereço do Supabase (<span class="mono">...supabase.co/auth/v1/callback</span>) vai em <strong>Authorized redirect URIs</strong>. O campo <strong>Authorized domains</strong> aceita só o <strong>seu</strong> domínio (<span class="mono">persontask.com.br</span>) — pôr o do Supabase ali dá erro.</p></div>
+      <p>Trocar de hospedagem <strong>não</strong> exige mexer no Google: o retorno é sempre para o Supabase, que não mudou.</p>
     </section>
 
+    <!-- 7 ─────────────────────────────────────────────────────────── -->
     <section class="doc" id="s7">
-      <div class="sec-head"><div class="sec-num">7</div><h2>Autenticação (login)</h2></div>
-      <ul class="clean">
-        <li><strong>E-mail/senha</strong> e <strong>Google</strong> (OAuth) — ambos ativos.</li>
-        <li><strong>Google:</strong> credenciais no Google Cloud Console. Redirect autorizado: <code>https://wogilvheyciprqqkprol.supabase.co/auth/v1/callback</code>. No Supabase: Authentication → Providers → Google (Client ID + Secret).</li>
-        <li><strong>URLs (Supabase → Authentication → URL Configuration):</strong> Site URL <code>https://persontask.com.br</code>; Redirect <code>https://persontask.com.br/**</code>.</li>
-        <li><strong>Recuperar senha:</strong> rotas <code>/forgot-password</code> e <code>/reset-password</code> no app; e-mail via Resend SMTP.</li>
-      </ul>
-      <div class="note tip"><span class="ic">🔑</span><p>Se um usuário não consegue entrar: Supabase → Authentication → <strong>Users</strong> permite reenviar recuperação, confirmar e-mail manualmente ou remover o usuário.</p></div>
+      <div class="sec-head"><div class="sec-num">7</div><h2>Domínio e DNS</h2></div>
+      <p>O domínio está registrado na Locaweb, e o DNS também é lá. Situação atual:</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Registro</th><th>Valor</th><th>Para quê</th></tr></thead>
+          <tbody>
+            <tr><td><span class="mono">@</span> (A)</td><td><span class="mono">75.2.60.5</span></td><td>Aponta o domínio raiz para o Netlify</td></tr>
+            <tr><td><span class="mono">www</span> (CNAME)</td><td><span class="mono">persontask.netlify.app</span></td><td>Aponta o www para o Netlify</td></tr>
+            <tr><td><span class="mono">resend._domainkey</span> (TXT)</td><td>chave DKIM</td><td><strong>Assinatura dos e-mails</strong></td></tr>
+            <tr><td><span class="mono">send</span> e <span class="mono">rsend</span> (CNAME)</td><td><span class="mono">*.forge.rmta.net</span></td><td><strong>Entrega dos e-mails</strong></td></tr>
+            <tr><td><span class="mono">_dmarc</span> (TXT)</td><td>política DMARC</td><td><strong>Reputação do domínio</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note danger"><span class="ic">📧</span><p><strong>Os quatro registros de e-mail são sagrados.</strong> Perder qualquer um deles faz os e-mails do app irem para spam ou simplesmente não chegarem — e o sintoma demora a aparecer. Antes de mexer em DNS, <strong>anote todos</strong>.</p></div>
+      <div class="note tip"><span class="ic">📭</span><p><strong>Não existe registro MX</strong> no domínio: a caixa humana é o Gmail <span class="mono">contato.persontask@gmail.com</span>. Isso simplifica qualquer mudança de DNS — não há caixa de e-mail para quebrar.</p></div>
+      <h3>Para mover o domínio para o Cloudflare</h3>
+      <p>O Cloudflare só aceita o domínio raiz (sem www) se o DNS estiver nos servidores dele. Isso exige trocar os nameservers na Locaweb e <strong>recriar todos os registros acima</strong>. O Cloudflare importa os existentes automaticamente, mas confira um a um depois — principalmente os quatro de e-mail.</p>
+      <p>Ordem segura: criar tudo no Cloudflare → conferir → só então trocar os nameservers. O Netlify continua servindo enquanto o DNS não vira.</p>
     </section>
 
+    <!-- 8 ─────────────────────────────────────────────────────────── -->
     <section class="doc" id="s8">
-      <div class="sec-head"><div class="sec-num">8</div><h2>Banco de dados &amp; segurança</h2></div>
-      <ul class="clean">
-        <li><strong>Postgres no Supabase</strong> com <strong>RLS (Row Level Security)</strong> por Espaço — cada pessoa só enxerga os Espaços de que participa.</li>
-        <li><strong>Fonte da verdade do schema:</strong> <code>supabase/schema.sql</code> (idempotente). Para recriar/reparar: Supabase → <strong>SQL Editor</strong> → cole e rode.</li>
-        <li>Se uma criação de Espaço falhar com erro <code>42501</code>, rode o <code>schema.sql</code> de novo (recria as policies).</li>
-        <li><strong>Arquivos (anexos, avatares, fundos):</strong> Supabase Storage (buckets <code>attachments</code>, <code>avatars</code>, <code>space-backgrounds</code>).</li>
-      </ul>
-      <div class="note warn"><span class="ic">💾</span><p><strong>Backups:</strong> confira em Supabase → Database → Backups. No plano gratuito os backups são limitados — se o negócio crescer, o plano Pro traz backups diários e retenção maior.</p></div>
+      <div class="sec-head"><div class="sec-num">8</div><h2>Planos: Grátis e Premium</h2></div>
+      <p>O plano fica na coluna <span class="mono">plan</span> da tabela <span class="mono">profiles</span>: <span class="mono">free</span> ou <span class="mono">premium</span>.</p>
+      <h3>Ativar o Premium para alguém</h3>
+      <ol class="steps">
+        <li>Supabase → Table Editor → tabela <span class="mono">profiles</span>.</li>
+        <li>Procure pelo e-mail da pessoa.</li>
+        <li>Mude <span class="mono">plan</span> para <span class="mono">premium</span> e salve.</li>
+        <li>A pessoa recarrega a página e já tem os recursos.</li>
+      </ol>
+      <div class="note warn"><span class="ic">💳</span><p><strong>Não há cobrança automática.</strong> A ativação é manual, feita por você. Isso está dito nos Termos de Uso — quando entrar um meio de pagamento, os Termos precisam ser atualizados junto.</p></div>
+      <p>O que o Premium libera: vários Espaços, vários Painéis por Espaço, imagem de fundo, fonte, cor de Coluna, logotipo da empresa e Espaços interligados.</p>
     </section>
 
+    <!-- 9 ─────────────────────────────────────────────────────────── -->
     <section class="doc" id="s9">
-      <div class="sec-head"><div class="sec-num">9</div><h2>Edge Functions &amp; Cron</h2></div>
-      <p>As funções de e-mail rodam no Supabase (Deno). São 4:</p>
-      <ul class="clean">
-        <li><code>notify-item-assigned</code> — avisa quem virou responsável.</li>
-        <li><code>notify-mention</code> — avisa quem foi mencionado (@).</li>
-        <li><code>notify-due-soon</code> — avisa prazos próximos (roda por <strong>cron</strong>).</li>
-        <li><code>send-invite</code> — envia o convite para o Espaço.</li>
-      </ul>
-      <h3>Reimplantar (se editar uma função)</h3>
-      <pre>cd /c/Users/User/persontask-app
-npx supabase functions deploy notify-item-assigned notify-mention notify-due-soon send-invite \
-  --project-ref wogilvheyciprqqkprol --no-verify-jwt</pre>
-      <p>O <strong>cron</strong> do vencimento está em <code>supabase/cron.sql</code> (pg_cron + pg_net, ~11:00 UTC). Os <strong>secrets</strong> das funções ficam em Supabase → Edge Functions → Secrets.</p>
-      <div class="note tip"><span class="ic">🖥️</span><p>O login do Supabase CLI fica guardado no Windows — por isso o <code>deploy</code> das funções roda no <strong>seu</strong> terminal.</p></div>
+      <div class="sec-head"><div class="sec-num">9</div><h2>Playbook — tarefas comuns</h2></div>
+
+      <h3>Atualizar o manual do usuário</h3>
+      <ol class="steps">
+        <li>Editar <span class="mono">public/manual.html</span>.</li>
+        <li>Com o <span class="kbd">npm run dev</span> rodando, gerar o PDF do próprio HTML:<br>
+          <span class="kbd">msedge --headless --no-pdf-header-footer --print-to-pdf="C:\Users\User\persontask-app\public\PERSONTASK-Manual.pdf" --virtual-time-budget=12000 "http://localhost:5173/manual.html"</span></li>
+        <li>Publicar com <span class="mono">git push</span>.</li>
+      </ol>
+      <div class="note tip"><span class="ic">📄</span><p>O PDF sai do próprio HTML justamente para os dois nunca divergirem. A rota antiga passava por Word e dava retrabalho.</p></div>
+
+      <h3>Adicionar um recurso novo ao app</h3>
+      <ol class="steps">
+        <li>Se mexer no banco, escrever um <span class="mono">.sql</span> idempotente em <span class="mono">supabase/</span> e rodar no SQL Editor.</li>
+        <li>Programar, rodar <span class="kbd">npm run typecheck</span> e <span class="kbd">npm run build</span>.</li>
+        <li>Acrescentar os textos nos <strong>três idiomas</strong> em <span class="mono">src/i18n/locales/</span>.</li>
+        <li>Testar no local, enviar com <span class="mono">git push</span>.</li>
+      </ol>
+
+      <h3>Ver quem está usando</h3>
+      <p>Supabase → Table Editor → <span class="mono">profiles</span> mostra todos os cadastros; <span class="mono">spaces</span>, quantos Espaços existem.</p>
+
+      <h3>Apagar a conta de alguém (pedido de LGPD)</h3>
+      <p>Supabase → Authentication → Users → localizar pelo e-mail → excluir. O perfil e os dados associados saem junto, por efeito cascata. A política promete fazer isso em até 30 dias.</p>
     </section>
 
+    <!-- 10 ────────────────────────────────────────────────────────── -->
     <section class="doc" id="s10">
-      <div class="sec-head"><div class="sec-num">10</div><h2>Playbook — tarefas comuns</h2></div>
-      <div class="tbl-wrap"><table>
-        <thead><tr><th>Quero…</th><th>Como fazer</th></tr></thead>
-        <tbody>
-          <tr><td>Dar Premium a alguém</td><td>Supabase → Table Editor → <code>profiles</code> → <code>plan = premium</code></td></tr>
-          <tr><td>Publicar uma atualização</td><td><code>npm run build</code> → arrastar <code>dist</code> no Netlify (seção 3)</td></tr>
-          <tr><td>Ver por que um e-mail não chegou</td><td>Resend → Emails (status). Se vazio: Supabase → Logs → Auth</td></tr>
-          <tr><td>Reenviar recuperação de senha</td><td>Supabase → Authentication → Users → menu do usuário</td></tr>
-          <tr><td>Mudar o texto dos e-mails</td><td>Authentication → Emails → Templates (usar <code>supabase/email-templates/</code>)</td></tr>
-          <tr><td>Editar textos da interface</td><td><code>src/i18n/locales/{pt,en,es}.json</code> → rebuild → deploy</td></tr>
-          <tr><td>Trocar o remetente de e-mail</td><td>Secret <code>EMAIL_FROM</code> (Functions) e Sender no SMTP</td></tr>
-        </tbody>
-      </table></div>
+      <div class="sec-head"><div class="sec-num">10</div><h2>Quando quebra</h2></div>
+      <p>Todos os casos abaixo já aconteceram de verdade. O sintoma vem primeiro, porque é por ele que você chega aqui.</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Sintoma</th><th>Causa provável</th><th>O que fazer</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Nenhum e-mail do app chega, mas a função responde OK</td>
+              <td>Chave do Resend inválida — ela foi rotacionada</td>
+              <td>Supabase → Edge Functions → a função → <strong>Logs</strong>. Se disser <span class="mono">401</span>, atualizar o segredo <span class="mono">RESEND_API_KEY</span>.</td>
+            </tr>
+            <tr>
+              <td>E-mail de recuperar senha não chega</td>
+              <td>Usuário do SMTP com maiúscula</td>
+              <td>Supabase → Authentication → Emails → SMTP: usuário tem que ser <span class="mono">resend</span>, minúsculo.</td>
+            </tr>
+            <tr>
+              <td>Login pelo Google volta para o endereço errado</td>
+              <td>Endereço fora dos Redirect URLs</td>
+              <td>Acrescentar <span class="mono">https://SEU-ENDERECO/**</span> em Authentication → URL Configuration.</td>
+            </tr>
+            <tr>
+              <td>Deploy falha em "Deploying" com laço infinito</td>
+              <td>O arquivo <span class="mono">public/_redirects</span> voltou</td>
+              <td>Apagar o arquivo. A regra de rota é do <span class="mono">wrangler.jsonc</span>.</td>
+            </tr>
+            <tr>
+              <td>Recurso novo não aparece ou não salva</td>
+              <td>O SQL da migração não foi rodado</td>
+              <td>Rodar o <span class="mono">.sql</span> correspondente no SQL Editor.</td>
+            </tr>
+            <tr>
+              <td>O site não mostra a versão nova</td>
+              <td>Deploy não passou, ou cache do navegador</td>
+              <td>Conferir Deployments no Cloudflare; depois <span class="kbd">Ctrl+Shift+R</span>.</td>
+            </tr>
+            <tr>
+              <td>Links dentro dos e-mails apontam para localhost</td>
+              <td>Segredo <span class="mono">APP_URL</span> vazio</td>
+              <td>Definir <span class="mono">APP_URL</span> nos Secrets das Edge Functions.</td>
+            </tr>
+            <tr>
+              <td>E-mails caem no spam</td>
+              <td>Reputação de domínio novo, ou registro de DNS perdido</td>
+              <td>Conferir os registros do Resend no DNS. Reputação melhora com o uso.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note tip"><span class="ic">🔎</span><p><strong>Regra geral:</strong> antes de mexer no código, veja se o erro é de <em>configuração</em>. Na grande maioria das vezes foi — segredo errado, endereço não liberado ou SQL não rodado.</p></div>
     </section>
 
+    <!-- 11 ────────────────────────────────────────────────────────── -->
     <section class="doc" id="s11">
-      <div class="sec-head"><div class="sec-num">11</div><h2>Solução de problemas</h2></div>
-      <div class="tbl-wrap"><table>
-        <thead><tr><th>Sintoma</th><th>Causa provável / correção</th></tr></thead>
-        <tbody>
-          <tr><td>E-mail do Supabase não chega e nada aparece no Resend</td><td>SMTP: o <strong>Username</strong> tem que ser <code>resend</code> (minúsculo). Confira também a API key e a porta (465→587).</td></tr>
-          <tr><td>E-mail cai no spam</td><td>Reputação de domínio novo. Autenticação está OK — marque "não é spam"; melhora com o uso.</td></tr>
-          <tr><td>Criar Espaço dá erro 42501</td><td>Rode <code>supabase/schema.sql</code> de novo (recria as policies de RLS).</td></tr>
-          <tr><td>"Instalar app" não aparece</td><td>Ícones PWA precisam existir em <code>public/icons</code> (192/512 PNG) — rebuild + deploy.</td></tr>
-          <tr><td>Rota abre página em branco / 404 no Netlify</td><td>SPA: garantir <code>public/_redirects</code> (<code>/*  /index.html  200</code>).</td></tr>
-          <tr><td>Login Google dá "provider not enabled"</td><td>Ativar Google em Supabase → Providers e conferir o redirect no Google Cloud.</td></tr>
-          <tr><td>Fonte não muda (Premium)</td><td>A família precisa estar carregada no <code>index.html</code> (Google Fonts).</td></tr>
-        </tbody>
-      </table></div>
+      <div class="sec-head"><div class="sec-num">11</div><h2>Custos e limites</h2></div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Serviço</th><th>Plano</th><th>O limite que aperta primeiro</th></tr></thead>
+          <tbody>
+            <tr><td>Cloudflare</td><td>Grátis</td><td>500 builds por mês. Na prática, não chega perto.</td></tr>
+            <tr><td>Supabase</td><td>Grátis</td><td>Espaço em disco e <strong>retenção curta de backup</strong>. O projeto hiberna se ficar semanas sem uso.</td></tr>
+            <tr><td>Resend</td><td>Grátis</td><td>Volume mensal de e-mails.</td></tr>
+            <tr><td>Locaweb</td><td>Pago</td><td>Anuidade do domínio — <strong>não deixe vencer</strong>.</td></tr>
+            <tr><td>GitHub</td><td>Grátis</td><td>Nenhum, para repositório privado deste tamanho.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note warn"><span class="ic">💸</span><p>O Netlify saiu porque o plano gratuito passou a <strong>cobrar créditos por deploy</strong> e eles acabaram. Fique de olho em mudança de regra dos planos gratuitos — foi exatamente isso que forçou a migração.</p></div>
+      <div class="note danger"><span class="ic">📆</span><p><strong>Anote a data de renovação do domínio.</strong> Domínio vencido tira o app do ar e, dependendo do tempo, pode ser comprado por outra pessoa.</p></div>
     </section>
 
+    <!-- 12 ────────────────────────────────────────────────────────── -->
     <section class="doc" id="s12">
-      <div class="sec-head"><div class="sec-num">12</div><h2>Custos &amp; limites</h2></div>
-      <p>Hoje tudo roda em planos <strong>gratuitos</strong> (fora o domínio). Ficar de olho nos limites conforme crescer:</p>
-      <div class="tbl-wrap"><table>
-        <thead><tr><th>Serviço</th><th>Plano atual</th><th>Quando pensar em upgrade</th></tr></thead>
-        <tbody>
-          <tr><td>Netlify</td><td>Grátis</td><td>Muito tráfego/banda ou builds automáticos</td></tr>
-          <tr><td>Supabase</td><td>Grátis</td><td>Mais base de dados, backups diários, projeto sempre ativo (Pro)</td></tr>
-          <tr><td>Resend</td><td>Grátis</td><td>Acima do limite mensal de e-mails</td></tr>
-          <tr><td>Locaweb (domínio)</td><td>Pago (anual)</td><td>Renovação anual — não deixe expirar</td></tr>
-          <tr><td>Google OAuth</td><td>Grátis</td><td>—</td></tr>
-        </tbody>
-      </table></div>
-      <div class="note warn"><span class="ic">📅</span><p><strong>Renovação do domínio:</strong> anote a data na Locaweb. Se o domínio expirar, o site e os e-mails param.</p></div>
+      <div class="sec-head"><div class="sec-num">12</div><h2>Segredos — onde ficam</h2></div>
+      <div class="note danger"><span class="ic">🔐</span><p><strong>Nada disso entra no GitHub.</strong> O arquivo <span class="mono">.env</span> está no <span class="mono">.gitignore</span> e precisa continuar lá.</p></div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Segredo</th><th>Onde vive</th><th>Pode ser público?</th></tr></thead>
+          <tbody>
+            <tr><td><span class="mono">VITE_SUPABASE_ANON_KEY</span></td><td>Variáveis do Cloudflare e <span class="mono">.env</span> local</td><td><strong>Sim</strong> — é feita para o navegador. Quem protege os dados é o RLS.</td></tr>
+            <tr><td><span class="mono">service_role</span> do Supabase</td><td>Só no painel do Supabase</td><td><strong>NÃO.</strong> Ignora todas as regras de segurança.</td></tr>
+            <tr><td><span class="mono">RESEND_API_KEY</span></td><td>Secrets das Edge Functions e SMTP do Auth</td><td><strong>NÃO.</strong></td></tr>
+            <tr><td>Client Secret do Google</td><td>Google Cloud Console e Supabase</td><td><strong>NÃO.</strong></td></tr>
+            <tr><td>Senhas de Cloudflare, Supabase, Locaweb</td><td>Gerenciador de senhas</td><td><strong>NÃO.</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note warn"><span class="ic">🧯</span><p><strong>Se vazar alguma chave:</strong> gere uma nova no painel do serviço e atualize <em>todos</em> os lugares que a usam. No caso do Resend são dois — o Secrets das funções <strong>e</strong> o SMTP do Auth. Esquecer um deles quebra metade dos e-mails em silêncio.</p></div>
     </section>
 
+    <!-- 13 ────────────────────────────────────────────────────────── -->
     <section class="doc" id="s13">
-      <div class="sec-head"><div class="sec-num">13</div><h2>Segredos — onde ficam (nunca versionar)</h2></div>
-      <p>Estes valores são <strong>sensíveis</strong>. Guarde num gerenciador de senhas e <strong>nunca</strong> os coloque no GitHub.</p>
-      <div class="tbl-wrap"><table>
-        <thead><tr><th>Segredo</th><th>Onde vive</th></tr></thead>
-        <tbody>
-          <tr><td>Resend API key</td><td>Resend → API Keys · usado nos secrets das Functions e no SMTP do Supabase</td></tr>
-          <tr><td>Supabase <em>service_role</em> key</td><td>Supabase → Project Settings → API (uso só server-side)</td></tr>
-          <tr><td>Google Client Secret</td><td>Google Cloud Console → Credentials</td></tr>
-          <tr><td>Chaves locais de build</td><td><code>persontask-app/.env</code> — é <strong>gitignored</strong>, não subir</td></tr>
-        </tbody>
-      </table></div>
-      <div class="note danger"><span class="ic">🔐</span><p>A chave <em>anon/publishable</em> do Supabase é pública (vai no app, tudo bem). Já a <em>service_role</em>, a API key do Resend e o Client Secret do Google são <strong>secretos</strong> — se vazarem, revogue e gere novos.</p></div>
+      <div class="sec-head"><div class="sec-num">13</div><h2>Mapa do código</h2></div>
+      <p>Para quando você — ou outra pessoa — precisar mexer:</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Onde</th><th>O que tem</th></tr></thead>
+          <tbody>
+            <tr><td><span class="mono">CLAUDE.md</span></td><td><strong>Comece por aqui.</strong> O memorial técnico: decisões, armadilhas e o porquê de cada escolha.</td></tr>
+            <tr><td><span class="mono">src/lib/api.ts</span></td><td>Todo acesso ao banco passa por aqui.</td></tr>
+            <tr><td><span class="mono">src/lib/schedule.ts</span></td><td>O motor do cronograma: dias úteis, agendamento automático, consolidação das fases.</td></tr>
+            <tr><td><span class="mono">src/features/space/</span></td><td>A tela do Espaço: quadro, lista, relatório, card, cronograma, CRM.</td></tr>
+            <tr><td><span class="mono">src/i18n/locales/</span></td><td>Os textos em português, inglês e espanhol.</td></tr>
+            <tr><td><span class="mono">public/</span></td><td>Manual, termos, privacidade, ícones e as imagens da landing.</td></tr>
+            <tr><td><span class="mono">supabase/</span></td><td>As migrações SQL e as funções de e-mail.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note tip"><span class="ic">📘</span><p>O <span class="mono">CLAUDE.md</span> é mantido atualizado a cada rodada de trabalho e registra inclusive os erros já cometidos, para não se repetirem. Se algo neste manual parecer desatualizado, ele é a fonte mais recente.</p></div>
     </section>
 
   </main>
 </div>
-
 <footer class="foot">
   <div class="foot-mark">PERSON<span>TASK</span></div>
   <p>Manual de Operações Interno · uso administrativo · © 2026 PERSONTASK</p>
