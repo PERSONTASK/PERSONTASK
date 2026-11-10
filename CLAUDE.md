@@ -52,7 +52,7 @@ supabase/       schema.sql, cron.sql, functions/
 - Campos personalizados (`custom_field_defs`): tipos text/number/datetime/**checkbox**/select (checklist foi removido dos campos).
 
 ## Onboarding (card de boas-vindas + manual)
-- **Manual:** `public/manual.html` (guia visual moderno, servido em `/manual.html`, com botão "Baixar em PDF") + `public/PERSONTASK-Manual.pdf` (download; o usuário pediu **PDF, não .docx**, pra evitar edição). Pipeline: `scratchpad/docxgen/gen.js` (docx-js) gera o `.docx` intermediário → convertido a PDF via **Word COM**/PowerShell `Documents.Open(...).ExportAsFixedFormat($dst, 17)`. O `.docx` **não** é publicado.
+- **Manual do usuário:** `public/manual.html` (14 seções, reescrito em nov/2026 cobrindo CRM, cronograma, relatórios, avisos e moeda) + `public/PERSONTASK-Manual.pdf`. **Pipeline atual:** o PDF sai do próprio HTML, com Edge headless — `msedge --headless --no-pdf-header-footer --print-to-pdf="<abs>" --virtual-time-budget=12000 "http://localhost:5173/manual.html"` (precisa do `npm run dev` no ar). A rota antiga por docx-js + Word COM foi abandonada: gerar do HTML mantém os dois idênticos.
 - **Card automático:** ao criar Espaço, `CreateSpaceDialog` chama `api.spaces.seedWelcome` → Painel "Bem-vindo" + Coluna + Item **"🧭 ESTÁ PERDIDO?! COMECE POR AQUI"** com os links do manual, no idioma atual (chaves i18n `welcome.*`). Não bloqueia a criação se falhar.
 - **Acesso permanente:** `ProfileMenu` tem link **"Manual / Ajuda"** (`nav.manual`) → `${APP_URL}/manual.html` (nova aba).
 - **Links clicáveis:** `ItemDetail` transforma URLs da descrição em botões (`extractUrls`) abaixo do textarea.
@@ -170,3 +170,13 @@ supabase/       schema.sql, cron.sql, functions/
 - **Data de referência de um card = `done_at` e, na falta dela, o Término consolidado** (`effectiveSchedule(item).end`). É o que responde "quando isso aconteceu" tanto para negócio ganho quanto para tarefa. Card **sem data fica fora** de qualquer período — o `ReportView` mostra quantos ficaram, para o número não parecer errado.
 - A semana começa na **segunda**. O gráfico de evolução muda de granularidade sozinho: ≤14 dias por dia, ≤92 por semana, acima disso por mês; sem período, últimos 6 meses.
 - O período entra como primeira linha do **Resumo** nas exportações, então o arquivo diz a que recorte se refere.
+
+## Publicação no Cloudflare (nov/2026)
+Os créditos do Netlify acabaram (plano Free gasta 15 créditos por deploy de produção) e a publicação migrou para o **Cloudflare**, conectada ao GitHub — todo push na `main` publica sozinho.
+
+- **Fluxo é Workers com assets, não Pages:** o Cloudflare encerrou a criação de projetos Pages no painel. `wrangler.jsonc` na raiz aponta `assets.directory: ./dist` e `not_found_handling: "single-page-application"` (a regra de SPA do React Router).
+- ⚠️ **`public/_redirects` foi REMOVIDO.** O Cloudflare lê esse arquivo do diretório de assets e rejeita `/* → /index.html 200` como laço infinito (`code: 100324`), porque no modelo dele quem faz o fallback é o `not_found_handling`. O `netlify.toml` já declarava a mesma regra, então o Netlify não perdeu nada.
+- **Variáveis de build** no painel do Cloudflare: `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY`. O `VITE_APP_URL` fica **de fora** de propósito — sem ele o código cai em `window.location.origin` e funciona em qualquer endereço sem rebuild.
+- **Node 20** vem do `.nvmrc` (vale para Cloudflare e Netlify).
+- Endereço provisório: `https://persontask.joabe-reis2.workers.dev`.
+- **O domínio `persontask.com.br` continua no Netlify** — DNS na Locaweb, apex por A para 75.2.60.5 e `www` por CNAME para `persontask.netlify.app`. A troca ficou para depois: o Cloudflare só aceita domínio raiz se o DNS estiver nos nameservers dele, e mover isso exige recriar os registros do Resend (`resend._domainkey`, `send`, `rsend`, `_dmarc`), que são o que faz o e-mail do app chegar. **Não há registro MX** (o e-mail humano é Gmail).

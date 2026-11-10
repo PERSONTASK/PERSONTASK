@@ -226,7 +226,7 @@
   <div class="hero-in">
     <span class="kicker">Manual de Operações</span>
     <h1>Tudo sobre o PERSONTASK,<br>em poucos minutos.</h1>
-    <p>Organize <strong>tarefas e pessoas por responsabilidade</strong>, com prazos, alertas por e-mail e colaboração em tempo real. Este guia mostra como tirar o máximo da ferramenta.</p>
+    <p>Três ferramentas num app só: <strong>funil de vendas</strong>, <strong>cronograma de projetos</strong> e <strong>quadro de tarefas</strong>. Este guia mostra como usar cada uma — e como elas conversam entre si.</p>
     <div class="hero-cta">
       <a class="btn btn-light" href="#s1">Começar a ler</a>
       <a class="btn btn-ghost" href="/PERSONTASK-Manual.pdf" download>⬇ Versão em PDF</a>
@@ -243,129 +243,327 @@
       <a href="#s2"><span class="n">2</span> Conceitos</a>
       <a href="#s3"><span class="n">3</span> Primeiros passos</a>
       <a href="#s4"><span class="n">4</span> O card por dentro</a>
-      <a href="#s5"><span class="n">5</span> Pessoas &amp; acesso</a>
-      <a href="#s6"><span class="n">6</span> Alertas &amp; e-mail</a>
-      <a href="#s7"><span class="n">7</span> Planos</a>
-      <a href="#s8"><span class="n">8</span> Personalização</a>
-      <a href="#s9"><span class="n">9</span> Idiomas &amp; app</a>
-      <a href="#s10"><span class="n">10</span> Perguntas</a>
+      <a href="#s5"><span class="n">5</span> Clientes (CRM)</a>
+      <a href="#s6"><span class="n">6</span> Cronograma</a>
+      <a href="#s7"><span class="n">7</span> As três visões</a>
+      <a href="#s8"><span class="n">8</span> Relatórios</a>
+      <a href="#s9"><span class="n">9</span> Prazos &amp; avisos</a>
+      <a href="#s10"><span class="n">10</span> Pessoas &amp; acesso</a>
+      <a href="#s11"><span class="n">11</span> E-mails</a>
+      <a href="#s12"><span class="n">12</span> Planos &amp; ajustes</a>
+      <a href="#s13"><span class="n">13</span> Idiomas &amp; app</a>
+      <a href="#s14"><span class="n">14</span> Perguntas</a>
     </div>
   </nav>
 
   <main>
 
+    <!-- 1 ───────────────────────────────────────────────────────────── -->
     <section class="doc" id="s1">
       <div class="sec-head"><div class="sec-num">1</div><h2>O que é o PERSONTASK</h2></div>
-      <p class="lead">O PERSONTASK é um aplicativo de gestão de <strong>tarefas e pessoas</strong> no estilo quadro (Kanban), com um diferencial: tudo é organizado <strong>por responsabilidade</strong>. Você enxerga rapidamente quem cuida do quê, o que está próximo do prazo e o que precisa de atenção.</p>
+      <p class="lead">Um lugar só para vender, entregar e acompanhar — sem copiar dado de um sistema para outro.</p>
+      <p>A maioria das equipes pequenas usa três ferramentas separadas: uma para o funil de vendas, outra para o cronograma dos projetos e uma terceira para as tarefas do dia. O PERSONTASK junta as três. O cliente que entra no funil vira um projeto com cronograma, que vira tarefa no quadro — tudo com os mesmos cadastros e as mesmas pessoas.</p>
       <div class="grid3">
-        <div class="tile"><div class="ic">🗂️</div><h3>Tarefas</h3><p>Cartões com prazo, checklists, anexos, etiquetas e campos próprios.</p></div>
-        <div class="tile"><div class="ic">👥</div><h3>Pessoas</h3><p>Responsáveis por cada tarefa, com perfis de acesso e convites por e-mail.</p></div>
-        <div class="tile"><div class="ic">🎯</div><h3>Responsabilidade</h3><p>Alertas automáticos de checkpoint e entrega para ninguém perder o prazo.</p></div>
+        <div class="tile"><h3>Funil de vendas</h3><p>Organizações e contatos cadastrados uma vez, reaproveitados em cada negócio novo. Valor, origem e previsão de fechamento.</p></div>
+        <div class="tile"><h3>Projetos</h3><p>Cada card é um projeto inteiro, com fases, tarefas, responsáveis, custos e gráfico de Gantt dentro dele.</p></div>
+        <div class="tile"><h3>Tarefas</h3><p>O quadro de arrastar e soltar que a equipe aprende em cinco minutos, com prazos, checklists e anexos.</p></div>
       </div>
+      <div class="note tip"><span class="ic">🧭</span><p>Não precisa usar tudo. Comece pelo quadro de tarefas e acrescente cronograma ou CRM quando fizer falta — cada recurso só aparece no card quando você o adiciona.</p></div>
     </section>
 
+    <!-- 2 ───────────────────────────────────────────────────────────── -->
     <section class="doc" id="s2">
       <div class="sec-head"><div class="sec-num">2</div><h2>Conceitos essenciais</h2></div>
       <p>Quatro palavras resumem toda a estrutura. Elas se encaixam uma dentro da outra:</p>
       <div class="hier">
-        <div class="lvl l1"><span class="tag">Espaço</span> A área de trabalho (ex.: uma empresa, um setor, um projeto)</div>
-        <div class="lvl l2"><span class="tag">Painel</span> Um quadro dentro do Espaço (ex.: "Marketing 2026")</div>
-        <div class="lvl l3"><span class="tag">Coluna</span> Uma etapa/fase (ex.: "A fazer", "Fazendo", "Concluído")</div>
-        <div class="lvl l4"><span class="tag">Item</span> O cartão da tarefa em si</div>
+        <div class="lvl l1"><span class="tag">Espaço</span> A área de trabalho (ex.: uma empresa, um setor, um cliente)</div>
+        <div class="lvl l2"><span class="tag">Painel</span> Um quadro dentro do Espaço (ex.: "Funil de Vendas")</div>
+        <div class="lvl l3"><span class="tag">Coluna</span> Uma etapa do fluxo (ex.: "Proposta enviada")</div>
+        <div class="lvl l4"><span class="tag">Item</span> O card em si — uma tarefa, um negócio ou um projeto</div>
       </div>
       <div class="tbl-wrap">
         <table>
           <thead><tr><th>Termo</th><th>O que é</th><th>Exemplo</th></tr></thead>
           <tbody>
-            <tr><td><strong>Espaço</strong></td><td>Sua área de trabalho — agrupa painéis, membros e configurações.</td><td>"TECHCONN"</td></tr>
+            <tr><td><strong>Espaço</strong></td><td>Sua área de trabalho — agrupa painéis, membros, cadastros e configurações.</td><td>"TECHCONN"</td></tr>
             <tr><td><strong>Painel</strong></td><td>Um quadro dentro do Espaço.</td><td>"Projetos 2026"</td></tr>
             <tr><td><strong>Coluna</strong></td><td>Uma etapa do fluxo dentro do Painel.</td><td>"Em andamento"</td></tr>
-            <tr><td><strong>Item</strong></td><td>A tarefa (cartão) que se move entre as colunas.</td><td>"Criar proposta"</td></tr>
+            <tr><td><strong>Item</strong> (card)</td><td>O cartão que se move entre as colunas.</td><td>"Implantação ACME"</td></tr>
           </tbody>
         </table>
       </div>
-      <div class="note tip"><span class="ic">💡</span><p>Você arrasta os <strong>Itens</strong> entre as <strong>Colunas</strong> para mostrar o progresso — exatamente como um quadro físico de post-its, só que colaborativo e com alertas.</p></div>
+      <div class="note tip"><span class="ic">💡</span><p>Cadastros de <strong>clientes</strong>, <strong>etiquetas</strong>, <strong>campos personalizados</strong> e <strong>recursos</strong> pertencem ao <strong>Espaço</strong> — ou seja, valem para todos os Painéis dele. Já as <strong>Colunas</strong> são de cada Painel.</p></div>
     </section>
 
+    <!-- 3 ───────────────────────────────────────────────────────────── -->
     <section class="doc" id="s3">
       <div class="sec-head"><div class="sec-num">3</div><h2>Primeiros passos</h2></div>
       <ol class="steps">
-        <li><strong>Crie sua conta</strong><span>Entre com <strong>e-mail e senha</strong> ou com <strong>“Continuar com Google”</strong>. É grátis e sem cartão. Esqueceu a senha? Use o link <strong>“Esqueceu a senha?”</strong> na tela de login.</span></li>
-        <li><strong>Crie seu primeiro Espaço</strong><span>Na tela inicial, clique em <strong>“Novo Espaço”</strong>, dê um nome (ex.: sua empresa) e confirme.</span></li>
-        <li><strong>Monte um Painel e Colunas</strong><span>Dentro do Espaço, crie um <strong>Painel</strong> e adicione <strong>Colunas</strong> (ex.: A fazer · Fazendo · Feito).</span></li>
-        <li><strong>Adicione Itens</strong><span>Clique em <strong>“Adicionar Item”</strong> numa Coluna e comece a descrever as tarefas.</span></li>
-        <li><strong>Convide sua equipe</strong><span>Em <strong>Membros</strong>, convide pessoas por e-mail e defina o perfil de acesso de cada uma.</span></li>
+        <li><strong>Crie sua conta</strong> com e-mail e senha, ou entre direto com o Google.</li>
+        <li><strong>Crie um Espaço.</strong> Dê o nome da sua empresa, setor ou cliente.</li>
+        <li><strong>Crie o primeiro Painel</strong> e escolha um <strong>modelo pronto</strong> — ele já vem com colunas, etiquetas, campos e cards de exemplo.</li>
+        <li><strong>Convide a equipe</strong> em <em>Membros → Convidar por e-mail</em>.</li>
+        <li><strong>Troque os exemplos</strong> pelos seus dados e comece a arrastar.</li>
       </ol>
-      <div class="note tip"><span class="ic">🧭</span><p>Todo Espaço novo já nasce com um cartão <strong>“ESTÁ PERDIDO?! COMECE POR AQUI”</strong> com o atalho para este manual. Pode apagá-lo quando quiser.</p></div>
+
+      <h3>Os três modelos prontos</h3>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Modelo</th><th>Para quê</th><th>Já vem com</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>CRM / Funil de Vendas</strong></td>
+              <td>Acompanhar negócios do lead ao fechamento.</td>
+              <td>Colunas do funil, etiquetas Quente/Morno/Frio, campos de Valor, Feeling e Origem, e dois negócios de exemplo com cliente cadastrado.</td>
+            </tr>
+            <tr>
+              <td><strong>Projetos</strong></td>
+              <td>Entregar projeto com prazo, escopo e custo.</td>
+              <td>Colunas de andamento, campos de Tipo de Projeto e Número da Proposta, e um card com <strong>cronograma modelo completo</strong> já datado.</td>
+            </tr>
+            <tr>
+              <td><strong>Tarefas</strong></td>
+              <td>O dia a dia da equipe.</td>
+              <td>A fazer / Fazendo / Concluído, etiquetas de urgência e checklist de exemplo.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note tip"><span class="ic">🚀</span><p>Todo Espaço novo nasce com um card <strong>"ESTÁ PERDIDO?! COMECE POR AQUI"</strong>, com o atalho para este manual. Pode apagá-lo quando não precisar mais.</p></div>
     </section>
 
+    <!-- 4 ───────────────────────────────────────────────────────────── -->
     <section class="doc" id="s4">
-      <div class="sec-head"><div class="sec-num">4</div><h2>O card (Item) por dentro</h2></div>
-      <p>Clique em qualquer Item para abrir o painel de detalhes. Use o botão <strong>“+ Adicionar”</strong> para revelar só o que precisar:</p>
-      <h3>🗓️ Datas &amp; prazos</h3>
-      <p>Defina a <strong>data de entrega</strong>. O cartão passa a mostrar o prazo e dispara alertas conforme a antecedência configurada no Espaço.</p>
-      <h3>👤 Responsáveis</h3>
-      <p>Atribua uma ou mais pessoas. Quem é definido como responsável recebe um <strong>e-mail de notificação</strong> na hora.</p>
-      <h3>🏷️ Etiquetas</h3>
-      <p>Marcadores coloridos para categorizar (ex.: “Urgente”, “Cliente”). Ficam sempre à mão no cartão.</p>
-      <h3>☑️ Checklists</h3>
-      <p>Listas de subtarefas com <strong>barra de progresso em %</strong>. Perfeito para quebrar uma tarefa grande em passos.</p>
-      <h3>🧩 Campos personalizados</h3>
-      <p>Crie campos do seu jeito: <strong>texto, número, data/hora, caixa de seleção</strong> ou <strong>lista suspensa</strong>. Você escolhe quais aparecem na face do cartão.</p>
-      <h3>📎 Anexos</h3>
-      <p>Envie <strong>PDF, Excel, Word, PowerPoint e imagens</strong> — clicando ou arrastando os arquivos para o cartão.</p>
-      <h3>💬 Comentários &amp; menções</h3>
-      <p>Converse dentro do cartão. Use <strong>@</strong> para mencionar alguém — a pessoa recebe um e-mail avisando.</p>
-      <h3>📄 Duplicar</h3>
-      <p>O botão <strong>“Duplicar card”</strong> copia tudo (conteúdo, checklists, campos, etiquetas, responsáveis e anexos) para reaproveitar tarefas repetitivas.</p>
-      <div class="note tip"><span class="ic">🔗</span><p>Colou um link na descrição de um cartão? Ele vira automaticamente um <strong>botão clicável</strong> logo abaixo do texto.</p></div>
+      <div class="sec-head"><div class="sec-num">4</div><h2>O card por dentro</h2></div>
+      <p>Clique em qualquer card para abri-lo. Ele começa simples — só título e descrição — e você acrescenta o que precisar pelo botão <strong>+ Adicionar</strong>.</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Recurso</th><th>Para que serve</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Descrição</strong></td><td>O texto livre do card. Links colados viram botões clicáveis logo abaixo.</td></tr>
+            <tr><td><strong>Término</strong></td><td>A data de entrega. É ela que liga o semáforo de atraso e os avisos por e-mail.</td></tr>
+            <tr><td><strong>Responsáveis</strong></td><td>Quem toca o card. Quem é marcado recebe um e-mail.</td></tr>
+            <tr><td><strong>Etiquetas</strong></td><td>Marcadores coloridos do Espaço, para classificar e filtrar.</td></tr>
+            <tr><td><strong>Checklists</strong></td><td>Listas de verificação com percentual — aparecem na face do card.</td></tr>
+            <tr><td><strong>Anexos</strong></td><td>PDF, Excel, Word, PowerPoint e imagens. Pode arrastar para dentro do card.</td></tr>
+            <tr><td><strong>Campos personalizados</strong></td><td>Campos criados por você: texto, número, data, caixa de seleção ou lista suspensa.</td></tr>
+            <tr><td><strong>Comentários</strong></td><td>Conversa do time. Mencione alguém com <strong>@</strong> e a pessoa recebe e-mail.</td></tr>
+            <tr><td><strong>Cliente</strong></td><td>Vincula o card a uma organização e a uma pessoa de contato. Veja a seção 5.</td></tr>
+            <tr><td><strong>Cronograma</strong></td><td>Transforma o card num projeto completo. Veja a seção 6.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Concluir um card</h3>
+      <p>No topo do card há o botão <strong>Marcar como concluído</strong>. Ele deixa o card verde no semáforo, coloca o selo <strong>Concluído</strong> na face e <strong>silencia o aviso de prazo</strong> — mesmo que a data já tenha passado. Clicar de novo reabre.</p>
+      <div class="note tip"><span class="ic">👁️</span><p>O ícone de <strong>olho</strong> ao lado de cada campo personalizado decide se ele aparece <strong>na face do card</strong>, sem precisar abrir. Use nos dois ou três que você olha o tempo todo.</p></div>
     </section>
 
+    <!-- 5 ───────────────────────────────────────────────────────────── -->
     <section class="doc" id="s5">
-      <div class="sec-head"><div class="sec-num">5</div><h2>Pessoas &amp; perfis de acesso</h2></div>
-      <p>Em <strong>Membros</strong>, você gerencia quem participa do Espaço e o que cada um pode fazer.</p>
-      <ul class="clean">
-        <li><strong>Convidar por e-mail</strong> — apenas administradores convidam. A pessoa recebe um e-mail para entrar.</li>
-        <li><strong>Perfis de acesso</strong> — vêm três prontos e <strong>editáveis</strong>: Usuário, Gestor e Administrador. O administrador máximo pode ajustar as permissões de cada perfil.</li>
-      </ul>
-      <div class="tbl-wrap">
-        <table>
-          <thead><tr><th>Perfil</th><th>Uso típico</th><th>Poder</th></tr></thead>
-          <tbody>
-            <tr><td><strong>Usuário</strong></td><td>Colaborador do dia a dia</td><td>Cria e edita Itens, comenta</td></tr>
-            <tr><td><strong>Gestor</strong></td><td>Líder de área</td><td>Gerencia Painéis, Colunas, etiquetas e campos</td></tr>
-            <tr><td><strong>Administrador</strong></td><td>Dono/gestor do Espaço</td><td>Tudo, incluindo membros, convites e configurações</td></tr>
-          </tbody>
-        </table>
+      <div class="sec-head"><div class="sec-num">5</div><h2>Clientes: organizações e contatos</h2></div>
+      <p class="lead">Cadastre a empresa e a pessoa uma vez; reaproveite em todo negócio novo.</p>
+      <p>Em vez de redigitar o nome do cliente em cada card, o PERSONTASK guarda dois cadastros no Espaço:</p>
+      <div class="grid3">
+        <div class="tile"><h3>Organização</h3><p>Razão social, nome fantasia, CNPJ, sistema que usa, segmento e status (Lead, Cliente, Em negociação…).</p></div>
+        <div class="tile"><h3>Pessoa de contato</h3><p>Nome, telefone e e-mail, vinculada a uma organização.</p></div>
+        <div class="tile"><h3>No card</h3><p>Escolha os dois numa lista. Escolher a pessoa já traz a organização dela junto.</p></div>
       </div>
-      <div class="note tip"><span class="ic">🛠️</span><p>As permissões são flexíveis: o administrador pode <strong>criar novos perfis</strong> e marcar exatamente o que cada um enxerga e edita.</p></div>
+      <p>O nome da organização aparece <strong>na face do card</strong>, com o ícone 🏢, então você identifica de quem é o negócio sem abrir nada.</p>
+      <h3>Onde gerenciar</h3>
+      <p>O botão <strong>🏢 Organizações</strong>, na barra de cima, abre o painel central: duas abas (Organizações e Pessoas), busca, edição e exclusão.</p>
+      <div class="note tip"><span class="ic">🔁</span><p>Os campos <strong>Sistema</strong> e <strong>Segmento</strong> são listas que se montam sozinhas: além das opções já usadas no Espaço, há sempre um <strong>"➕ Outro…"</strong> para criar na hora. Não precisa configurar nada antes.</p></div>
+      <div class="note warn"><span class="ic">⚠️</span><p>Excluir uma organização <strong>não apaga</strong> os negócios dela — os cards apenas ficam sem vínculo.</p></div>
     </section>
 
+    <!-- 6 ───────────────────────────────────────────────────────────── -->
     <section class="doc" id="s6">
-      <div class="sec-head"><div class="sec-num">6</div><h2>Alertas &amp; notificações por e-mail</h2></div>
-      <p>O PERSONTASK envia e-mails automáticos nos momentos que importam:</p>
+      <div class="sec-head"><div class="sec-num">6</div><h2>Cronograma do projeto</h2></div>
+      <p class="lead">Cada card pode ser um projeto inteiro, com cronograma próprio.</p>
+      <p>No card, use <strong>+ Adicionar → Cronograma</strong> e depois <strong>Criar cronograma do projeto</strong>. Abre uma tela cheia com duas visões: <strong>Tabela</strong> e <strong>Gantt</strong>.</p>
+
+      <h3>Montando as tarefas</h3>
+      <p>A estrutura tem três níveis, como num cronograma de verdade:</p>
+      <div class="hier">
+        <div class="lvl l1"><span class="tag">Fase</span> Agrupa o bloco (ex.: "EXECUÇÃO") — numerada 1, 2, 3…</div>
+        <div class="lvl l2"><span class="tag">Tarefa</span> O trabalho em si (ex.: "Testes de qualidade") — 1.1, 1.2…</div>
+        <div class="lvl l3"><span class="tag">Subtarefa</span> O detalhe dentro da tarefa — 1.1.1, 1.1.2…</div>
+      </div>
+      <p>A setinha ao lado da lixeira, no fim de cada linha, alterna entre os três níveis.</p>
+      <div class="note tip"><span class="ic">⌨️</span><p><strong>Atalhos que economizam tempo:</strong> em qualquer célula, <strong>↑ ↓</strong> andam entre as linhas na mesma coluna · <strong>Enter</strong> cria uma linha abaixo e já foca nela · <strong>Tab</strong> na última coluna também cria.</p></div>
+
+      <h3>As colunas</h3>
       <div class="tbl-wrap">
         <table>
-          <thead><tr><th>Gatilho</th><th>Quando dispara</th></tr></thead>
+          <thead><tr><th>Coluna</th><th>O que faz</th></tr></thead>
           <tbody>
-            <tr><td>📌 <strong>Tarefa atribuída</strong></td><td>Assim que você é definido como responsável por um Item.</td></tr>
-            <tr><td>⏰ <strong>Prazo próximo</strong></td><td>Automaticamente, com a antecedência (em dias) definida no Espaço.</td></tr>
-            <tr><td>💬 <strong>Menção</strong></td><td>Quando alguém usa <strong>@</strong> para mencionar você num comentário.</td></tr>
-            <tr><td>✉️ <strong>Convite</strong></td><td>Quando um administrador convida você para um Espaço.</td></tr>
+            <tr><td><strong>EDT</strong></td><td>A numeração automática (1, 1.1, 1.1.1) com o semáforo da tarefa.</td></tr>
+            <tr><td><strong>Duração</strong></td><td>Em dias úteis. Aceita fração: <strong>0,5</strong> é meio dia; <strong>1,5</strong>, um dia e meio.</td></tr>
+            <tr><td><strong>Trabalho (h)</strong></td><td>As horas. Anda junto com a Duração nos dois sentidos — digite 4 h e a duração vira 0,5 dia.</td></tr>
+            <tr><td><strong>Modo</strong></td><td><strong>Automático</strong>: as datas se calculam sozinhas. <strong>Manual</strong>: você escolhe as datas.</td></tr>
+            <tr><td><strong>Predecessoras</strong></td><td>Digite a EDT de quem vem antes (ex.: <code>1.2</code>). A tarefa emenda automaticamente.</td></tr>
+            <tr><td><strong>Recurso</strong></td><td>Quem executa. Pode ser <strong>mais de um</strong> — o custo soma o valor/hora de todos.</td></tr>
+            <tr><td><strong>Custo</strong></td><td>Calculado: horas × soma dos custos/hora dos responsáveis.</td></tr>
           </tbody>
         </table>
       </div>
-      <div class="note warn"><span class="ic">📬</span><p>O <strong>primeiro</strong> e-mail que você receber pode cair no <strong>spam/lixo eletrônico</strong> até seu provedor reconhecer o remetente. Marque como “não é spam” e os próximos chegam na caixa de entrada.</p></div>
+      <p>As linhas de <strong>Fase</strong> não se digitam: Início, Término, Duração, %, Trabalho e Custo vêm consolidados das tarefas filhas.</p>
+
+      <h3>Recursos e calendário</h3>
+      <div class="grid3">
+        <div class="tile"><h3>Recursos</h3><p>Cadastro de pessoas com <strong>custo por hora</strong>. É o que permite o projeto calcular custo sozinho.</p></div>
+        <div class="tile"><h3>Calendário</h3><p>Quais dias são úteis, quantas horas tem o dia e os <strong>feriados</strong>. O cronograma pula os dias não úteis.</p></div>
+        <div class="tile"><h3>Importar</h3><p>Copia a estrutura de outro card, com as datas deslocadas para um novo início.</p></div>
+      </div>
+
+      <h3>Farol de desempenho</h3>
+      <p>No topo do cronograma, uma faixa compara o <strong>avanço real</strong> com o <strong>previsto pelo tempo decorrido</strong>:</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Cor</th><th>Quando aparece</th></tr></thead>
+          <tbody>
+            <tr><td>🟢 <strong>No ritmo</strong></td><td>O avanço real está igual ou acima do previsto.</td></tr>
+            <tr><td>🟡 <strong>Atenção</strong></td><td>Até 10 pontos percentuais abaixo do previsto.</td></tr>
+            <tr><td>🔴 <strong>Atrasado</strong></td><td>Mais de 10 pontos abaixo do previsto.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Gantt e exportações</h3>
+      <p>A aba <strong>Gantt</strong> mostra as barras na linha do tempo, com as setas de dependência e a linha do "hoje". O botão <strong>Real × Previsto</strong> divide cada barra em duas, para comparar.</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Exportação</th><th>O que sai</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Excel</strong></td><td>A tabela inteira, pronta para editar.</td></tr>
+            <tr><td><strong>PDF</strong></td><td>A tabela com a coluna Situação colorida.</td></tr>
+            <tr><td><strong>Gantt em PDF</strong></td><td>O gráfico, com régua de datas e paginação.</td></tr>
+            <tr><td><strong>XML para Project</strong></td><td>Abre no Microsoft Project por Arquivo › Abrir, com fases, durações, predecessoras e recursos.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note tip"><span class="ic">📄</span><p>O formato <strong>.MPP</strong> não é possível — ele é fechado e não tem especificação pública. O XML é o formato de intercâmbio oficial da própria Microsoft e carrega a mesma informação.</p></div>
+      <div class="note warn"><span class="ic">📅</span><p>Enquanto você não cadastrar os <strong>feriados</strong> no Calendário, o cronograma trata todo dia de semana como útil. Vale cadastrar antes de fechar as datas com o cliente.</p></div>
     </section>
 
+    <!-- 7 ───────────────────────────────────────────────────────────── -->
     <section class="doc" id="s7">
-      <div class="sec-head"><div class="sec-num">7</div><h2>Planos: Grátis e Premium</h2></div>
-      <p>Comece de graça. O <span class="pill">Premium</span> libera personalização e escala.</p>
+      <div class="sec-head"><div class="sec-num">7</div><h2>As três visões do Painel</h2></div>
+      <p>No canto direito da barra, você alterna entre três jeitos de olhar <strong>a mesma informação</strong>:</p>
+      <div class="grid3">
+        <div class="tile"><h3>Quadro</h3><p>Os cards em colunas, para arrastar. É a visão do dia a dia.</p></div>
+        <div class="tile"><h3>Lista</h3><p>Tudo em tabela: tarefa, fase, duração, início, término, situação, custo e observações. Exporta em Excel e PDF.</p></div>
+        <div class="tile"><h3>Relatório</h3><p>Os números: indicadores, gráficos e listas. Veja a seção 8.</p></div>
+      </div>
+      <div class="note tip"><span class="ic">🔍</span><p>A <strong>busca</strong> da barra de cima vale nas três visões — inclusive filtrando os números do relatório.</p></div>
+    </section>
+
+    <!-- 8 ───────────────────────────────────────────────────────────── -->
+    <section class="doc" id="s8">
+      <div class="sec-head"><div class="sec-num">8</div><h2>Relatórios e indicadores</h2></div>
+      <p>A visão <strong>Relatório</strong> tem duas abas.</p>
+
+      <h3>Aba Tarefas</h3>
+      <p>Funciona em qualquer Painel, sem configurar nada: quantas estão <strong>no prazo</strong>, <strong>vencendo</strong>, <strong>atrasadas</strong>, <strong>concluídas</strong> e <strong>sem data</strong> — com as atrasadas abertas por Coluna e por responsável, e a lista clicável.</p>
+
+      <h3>Aba Funil</h3>
+      <p>Precisa de uma configuração, feita uma vez por Painel no botão <strong>Configurar relatório</strong>:</p>
+      <ol class="steps">
+        <li><strong>Qual campo guarda o valor</strong> do negócio (um campo numérico).</li>
+        <li><strong>O que cada Coluna significa</strong>: Aberto, Ganho, Perdido ou Ignorar.</li>
+      </ol>
+      <p>Feito isso, o relatório mostra valor em aberto, ganho e perdido, ticket médio, taxa de conversão, valor por etapa, ganhos ao longo do tempo, carteira por responsável e os maiores negócios em aberto.</p>
+
+      <h3>Período</h3>
+      <p>O seletor de período recorta tudo: <strong>Tudo</strong>, <strong>Semana</strong>, <strong>Mês</strong>, <strong>Ano</strong> ou <strong>Escolher</strong> (data inicial e final). O gráfico de evolução ajusta a granularidade sozinho — a semana vira dias, o ano vira meses.</p>
+      <div class="note tip"><span class="ic">📊</span><p>O que posiciona um card no tempo é a <strong>data de conclusão</strong> e, na falta dela, o <strong>Término</strong>. Cards sem nenhuma das duas ficam fora do período — e o relatório avisa quantos foram.</p></div>
+      <p>Os botões <strong>Excel</strong> e <strong>PDF</strong> exportam exatamente o que está na tela, com o período anotado no resumo. No Excel, cada bloco vira uma aba.</p>
+    </section>
+
+    <!-- 9 ───────────────────────────────────────────────────────────── -->
+    <section class="doc" id="s9">
+      <div class="sec-head"><div class="sec-num">9</div><h2>Prazos, semáforo e avisos</h2></div>
+      <p>O <strong>Término</strong> do card comanda tudo que tem a ver com prazo.</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Cor</th><th>Significa</th></tr></thead>
+          <tbody>
+            <tr><td>🟢 <strong>No prazo</strong></td><td>Ainda há folga — ou o card está concluído.</td></tr>
+            <tr><td>🟡 <strong>Vencendo</strong></td><td>Vence nos próximos dias (você define quantos, nas Configurações do Espaço).</td></tr>
+            <tr><td>🔴 <strong>Atrasado</strong></td><td>A data passou e o card não está concluído.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>O sininho</h3>
+      <p>Na barra de cima, ao lado de Membros, o <strong>🔔</strong> lista os cards vencidos do Espaço inteiro — não só do Painel aberto. O número vermelho conta os avisos que você ainda não viu e <strong>zera quando você abre a lista</strong>.</p>
+      <p>Mas o aviso em si <strong>não some por ser visto</strong>: ele continua ali até o prazo ser resolvido. Cada linha tem dois atalhos:</p>
+      <div class="grid3">
+        <div class="tile"><h3>✓ Concluir</h3><p>Marca o card como concluído e o aviso sai na hora.</p></div>
+        <div class="tile"><h3>📅 Remarcar prazo</h3><p>Escolhe uma data nova ali mesmo, sem abrir o card.</p></div>
+        <div class="tile"><h3>Abrir o card</h3><p>Clicar no aviso leva direto ao card, no Painel certo.</p></div>
+      </div>
+      <div class="note warn"><span class="ic">📌</span><p>Um <strong>campo personalizado de data</strong> que você criar não liga o semáforo nem os avisos. Quem faz isso é só o <strong>Término</strong> do card, em <em>+ Adicionar → Término</em>.</p></div>
+    </section>
+
+    <!-- 10 ──────────────────────────────────────────────────────────── -->
+    <section class="doc" id="s10">
+      <div class="sec-head"><div class="sec-num">10</div><h2>Pessoas e perfis de acesso</h2></div>
+      <p>Em <strong>Membros</strong>, o administrador convida por e-mail e define o que cada pessoa pode fazer.</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Perfil</th><th>O que faz</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Administrador</strong></td><td>Tudo: configurações do Espaço, membros, painéis, cadastros e exclusões.</td></tr>
+            <tr><td><strong>Editor</strong></td><td>Cria e edita cards, colunas e cadastros. Não mexe nas configurações do Espaço.</td></tr>
+            <tr><td><strong>Leitor</strong></td><td>Só visualiza.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Esses são os perfis que já vêm prontos — o administrador pode <strong>criar outros</strong> e marcar exatamente o que cada um enxerga e edita.</p>
+
+      <h3>Migrar um card para outro Espaço</h3>
+      <p>Com <span class="pill">Premium</span> e Espaços interligados, o botão <strong>Mover/copiar</strong> leva um card para outro Espaço. Na hora, você escolhe o que acontece aqui:</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Opção</th><th>Consequência</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Manter o card aqui também</strong></td><td>Uma cópia vai para o outro Espaço. Metas, valores fechados e histórico continuam contando aqui.</td></tr>
+            <tr><td><strong>Tirar o card deste Espaço</strong></td><td>O card sai de vez. Os relatórios daqui deixam de contá-lo.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note tip"><span class="ic">⚙️</span><p>O padrão fica em <strong>Configurações do Espaço → Migrar cards</strong>, e vem marcado como "manter" — que é o seguro para os seus números.</p></div>
+    </section>
+
+    <!-- 11 ──────────────────────────────────────────────────────────── -->
+    <section class="doc" id="s11">
+      <div class="sec-head"><div class="sec-num">11</div><h2>E-mails automáticos</h2></div>
+      <p>O PERSONTASK envia e-mail em quatro situações — e só nessas:</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Quando</th><th>Quem recebe</th></tr></thead>
+          <tbody>
+            <tr><td>Você é marcado como <strong>responsável</strong> por um card</td><td>Quem foi marcado</td></tr>
+            <tr><td>Alguém te <strong>menciona com @</strong> num comentário</td><td>Quem foi mencionado</td></tr>
+            <tr><td>Um card está <strong>perto de vencer</strong> (aviso diário)</td><td>Os responsáveis</td></tr>
+            <tr><td>Você é <strong>convidado</strong> para um Espaço</td><td>Quem foi convidado</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note warn"><span class="ic">📬</span><p>O <strong>primeiro</strong> e-mail pode cair no <strong>spam/lixo eletrônico</strong> até seu provedor reconhecer o remetente. Marque como "não é spam" e os próximos chegam na entrada.</p></div>
+    </section>
+
+    <!-- 12 ──────────────────────────────────────────────────────────── -->
+    <section class="doc" id="s12">
+      <div class="sec-head"><div class="sec-num">12</div><h2>Planos e ajustes do Espaço</h2></div>
+      <p>Comece de graça. O <span class="pill">Premium</span> libera escala e personalização.</p>
       <div class="tbl-wrap">
         <table>
           <thead><tr><th>Recurso</th><th>Grátis</th><th>Premium</th></tr></thead>
           <tbody>
             <tr><td>Tarefas, prazos, checklists, anexos, comentários</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+            <tr><td>CRM, cronograma de projetos e relatórios</td><td class="yes">✓</td><td class="yes">✓</td></tr>
             <tr><td>Membros e convites por e-mail</td><td class="yes">✓</td><td class="yes">✓</td></tr>
             <tr><td>Quantidade de Espaços</td><td class="no">1</td><td class="yes">Vários</td></tr>
             <tr><td>Painéis por Espaço</td><td class="no">1</td><td class="yes">Vários</td></tr>
@@ -376,44 +574,51 @@
           </tbody>
         </table>
       </div>
+
+      <h3>Configurações do Espaço</h3>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Ajuste</th><th>O que muda</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Moeda</strong></td><td>Vale para Custo, Custo/hora e os campos marcados como dinheiro. Real, Dólar, Euro e mais nove.</td></tr>
+            <tr><td><strong>Aviso de vencimento</strong></td><td>Quantos dias antes o card fica amarelo.</td></tr>
+            <tr><td><strong>Etiquetas</strong></td><td>Cria, renomeia e colore as etiquetas do Espaço.</td></tr>
+            <tr><td><strong>Campos personalizados</strong></td><td>Cria os campos e marca quais são <strong>dinheiro</strong> e quais aparecem na face do card.</td></tr>
+            <tr><td><strong>Migrar cards</strong></td><td>O padrão ao levar um card para outro Espaço.</td></tr>
+          </tbody>
+        </table>
+      </div>
       <div class="note tip"><span class="ic">⭐</span><p>A ativação do Premium é feita no seu <strong>perfil</strong>. A cobrança automática será adicionada em breve.</p></div>
     </section>
 
-    <section class="doc" id="s8">
-      <div class="sec-head"><div class="sec-num">8</div><h2>Personalização <span class="pill">Premium</span></h2></div>
-      <p>Deixe o Espaço com a cara da sua marca em <strong>Configurações do Espaço</strong>:</p>
-      <ul class="clean">
-        <li><strong>Cor ou imagem de fundo</strong> do quadro.</li>
-        <li><strong>Fonte da interface</strong> — escolha entre várias tipografias.</li>
-        <li><strong>Logotipo da empresa</strong> — aparece como marca d’água no fundo.</li>
-        <li><strong>Espaços interligados</strong> — conecte áreas de trabalho relacionadas.</li>
-        <li><strong>Antecedência do alerta</strong> de vencimento (em dias).</li>
-      </ul>
+    <!-- 13 ──────────────────────────────────────────────────────────── -->
+    <section class="doc" id="s13">
+      <div class="sec-head"><div class="sec-num">13</div><h2>Idiomas, tema e app instalável</h2></div>
+      <div class="grid3">
+        <div class="tile"><h3>Três idiomas</h3><p>Português, inglês e espanhol. Troque no menu do perfil — vale só para você.</p></div>
+        <div class="tile"><h3>Claro e escuro</h3><p>O tema acompanha o sistema, ou você fixa o que preferir.</p></div>
+        <div class="tile"><h3>Instalável</h3><p>No celular e no computador, o PERSONTASK instala como aplicativo, com ícone próprio.</p></div>
+      </div>
+      <div class="note tip"><span class="ic">📖</span><p>Precisa rever este manual? Ele está sempre no <strong>menu do perfil → "Manual / Ajuda"</strong>.</p></div>
     </section>
 
-    <section class="doc" id="s9">
-      <div class="sec-head"><div class="sec-num">9</div><h2>Idiomas, tema e app</h2></div>
-      <ul class="clean">
-        <li><strong>3 idiomas</strong> — Português, Inglês e Espanhol, trocáveis no menu do perfil.</li>
-        <li><strong>Tema claro ou escuro</strong> — a interface acompanha sua preferência.</li>
-        <li><strong>Instale como aplicativo (PWA)</strong> — no navegador, use “Instalar app” para ter o PERSONTASK na área de trabalho ou no celular, com ícone próprio.</li>
-      </ul>
-      <div class="note tip"><span class="ic">📖</span><p>Precisa rever este manual? Ele está sempre no menu do seu perfil, em <strong>“Manual / Ajuda”</strong>.</p></div>
-    </section>
-
-    <section class="doc" id="s10">
-      <div class="sec-head"><div class="sec-num">10</div><h2>Perguntas frequentes</h2></div>
-      <details><summary>Posso usar sem pagar?</summary><p>Sim. O plano Grátis cobre o essencial: 1 Espaço com tarefas, prazos, checklists, anexos, membros e notificações por e-mail.</p></details>
-      <details><summary>Como convido pessoas?</summary><p>Em <strong>Membros → Convidar por e-mail</strong> (disponível para administradores). A pessoa recebe um e-mail com o convite para o Espaço.</p></details>
-      <details><summary>Quais arquivos posso anexar?</summary><p>PDF, Excel, Word, PowerPoint e imagens — clicando no cartão ou arrastando os arquivos para dentro dele.</p></details>
-      <details><summary>Não recebi o e-mail de notificação.</summary><p>Confira a caixa de <strong>spam/lixo eletrônico</strong> — o primeiro e-mail costuma cair lá. Marque como “não é spam” para os próximos chegarem na entrada.</p></details>
-      <details><summary>Esqueci minha senha. Como recupero?</summary><p>Na tela de login, clique em <strong>“Esqueceu a senha?”</strong>, informe seu e-mail e siga o link que enviaremos para criar uma nova senha.</p></details>
-      <details><summary>Perdi o cartão de boas-vindas. E agora?</summary><p>Sem problema: o manual fica sempre acessível no <strong>menu do perfil → “Manual / Ajuda”</strong>, e você pode baixá-lo em PDF aqui em cima.</p></details>
+    <!-- 14 ──────────────────────────────────────────────────────────── -->
+    <section class="doc" id="s14">
+      <div class="sec-head"><div class="sec-num">14</div><h2>Perguntas frequentes</h2></div>
+      <details><summary>Posso usar sem pagar?</summary><p>Sim. O plano Grátis cobre o essencial: 1 Espaço com 1 Painel, e <strong>todos</strong> os recursos de tarefa, CRM, cronograma e relatório.</p></details>
+      <details><summary>Como convido pessoas?</summary><p>Em <strong>Membros → Convidar por e-mail</strong> (só administradores). A pessoa recebe um convite por e-mail.</p></details>
+      <details><summary>Marquei a data num campo que criei e o card não ficou vermelho.</summary><p>O semáforo e os avisos olham só o <strong>Término</strong> do card, não campos personalizados. Use <em>+ Adicionar → Término</em>.</p></details>
+      <details><summary>Preciso preencher o cronograma inteiro na mão?</summary><p>Não. No modelo de Projetos, o card já nasce com um cronograma completo e datado — é só ajustar as durações. E dá para <strong>importar a estrutura</strong> de outro card.</p></details>
+      <details><summary>Por que a Fase não deixa eu digitar as datas?</summary><p>Porque ela é calculada: Início, Término, Duração, Trabalho e Custo vêm somados das tarefas filhas, como num cronograma profissional.</p></details>
+      <details><summary>O relatório de Funil está vazio.</summary><p>Ele precisa ser configurado uma vez: clique em <strong>Configurar relatório</strong> e diga qual campo é o valor do negócio e o que cada Coluna significa.</p></details>
+      <details><summary>Dá para exportar para o Microsoft Project?</summary><p>Sim, pelo botão <strong>XML para Project</strong> no cronograma. O arquivo abre em Arquivo › Abrir. O formato .MPP não é possível — ele é fechado e não tem especificação pública.</p></details>
+      <details><summary>Quais arquivos posso anexar?</summary><p>PDF, Excel, Word, PowerPoint e imagens — clicando no card ou arrastando os arquivos para dentro dele.</p></details>
+      <details><summary>Não recebi o e-mail de notificação.</summary><p>Confira a caixa de <strong>spam/lixo eletrônico</strong> — o primeiro costuma cair lá. Marque como "não é spam" para os próximos chegarem na entrada.</p></details>
+      <details><summary>Esqueci minha senha.</summary><p>Na tela de login, clique em <strong>"Esqueceu a senha?"</strong>, informe seu e-mail e siga o link que enviaremos.</p></details>
     </section>
 
   </main>
 </div>
-
 <footer class="foot">
   <div class="foot-mark">PERSON<span>TASK</span></div>
   <p>Dúvidas ou suporte: <a href="mailto:contato.persontask@gmail.com">contato.persontask@gmail.com</a></p>
