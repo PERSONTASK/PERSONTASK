@@ -1,0 +1,14 @@
+{
+  // PERSONTASK — publicação no Cloudflare (Workers com assets estáticos).
+  //
+  // O `npm run build` gera a pasta `dist`, e o Cloudflare serve ela direto
+  // da borda. `single-page-application` faz qualquer rota cair no
+  // index.html, que é o que o React Router precisa — mesmo papel do
+  // `public/_redirects` no Netlify.
+  "name": "persontask",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  }
+}
