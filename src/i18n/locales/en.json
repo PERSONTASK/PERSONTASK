@@ -242,7 +242,8 @@
     "keepHere": "Keep the card here too",
     "keepHereHint": "A copy goes to the other Space. Targets, closed value and history keep counting here.",
     "removeHere": "Take the card out of this Space",
-    "removeHereHint": "The card leaves for good. This Space reports stop counting it and the history goes with it."
+    "removeHereHint": "The card leaves for good. This Space reports stop counting it and the history goes with it.",
+    "uploadFailed": "Could not upload the file. Please try again."
   },
   "fields": {
     "text": "Text",

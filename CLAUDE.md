@@ -192,3 +192,10 @@ Verificação correta:
 curl -sL https://persontask.com.br/termos.html | grep -o "<title>[^<]*"
 curl -s https://persontask.com.br/ | grep -o 'assets/index-[A-Za-z0-9_-]*\.js'   # compara com dist/index.html
 ```
+
+## ⚠️ Anexos: o nome do arquivo não pode ir cru para o Storage
+A chave do Supabase Storage aceita só um conjunto restrito de caracteres. Nome com **acento, espaço ou símbolo** — normal em português ("Tela de reunião_TOTVS Gestão.png") — é recusado com `StorageApiError: Invalid key`, e o upload falha.
+
+`api.attachments.upload` passa o nome por `storageSafeName()`: tira acento por NFD, troca o resto por `-` e corta pela frente em 120 caracteres (a extensão fica no fim e sobrevive). O nome original continua em `attachments.file_name`, que é o que aparece na lista.
+
+O `AttachmentsEditor` ganhou um `catch` junto: sem ele o erro virava *unhandled rejection* — o círculo parava e nada era dito, deixando a pessoa sem pista nenhuma.

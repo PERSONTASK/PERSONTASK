@@ -51,6 +51,11 @@ export function AttachmentsEditor({
     setBusy(true);
     try {
       await onUpload(files);
+    } catch (e) {
+      // Sem este catch o erro virava "unhandled rejection": o círculo
+      // parava e nada era dito, deixando a pessoa sem saber o que houve.
+      console.error('[anexo] falha ao enviar', e);
+      setError(e instanceof Error ? e.message : t('item.uploadFailed'));
     } finally {
       setBusy(false);
     }

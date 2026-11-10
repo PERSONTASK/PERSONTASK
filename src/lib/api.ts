@@ -36,6 +36,26 @@ function embeddedCount(rel?: { count: number }[]): number {
   return rel?.[0]?.count ?? 0;
 }
 
+/**
+ * Nome seguro para a CHAVE do arquivo no Storage do Supabase.
+ *
+ * Ele aceita só um conjunto restrito de caracteres: acento, espaço e
+ * símbolo são recusados com `Invalid key` — e nome de arquivo em
+ * português quase sempre tem ("Tela de reunião_TOTVS Gestão.png").
+ *
+ * O nome original continua em `attachments.file_name`, que é o que a
+ * pessoa vê na lista; isto aqui só limpa o caminho interno.
+ */
+function storageSafeName(name: string): string {
+  const semAcento = name.normalize('NFD').replace(/[̀-ͯ]/g, '');
+  const limpo = semAcento
+    .replace(/[^a-zA-Z0-9._-]+/g, '-')
+    .replace(/-{2,}/g, '-')
+    .replace(/^-+|-+$/g, '');
+  // Corta pela frente, para a extensão (que fica no fim) sobreviver.
+  return limpo.slice(-120) || 'arquivo';
+}
+
 /** Evento disparado sempre que um card muda. */
 export const ITEMS_CHANGED = 'persontask:items-changed';
 
@@ -794,7 +814,7 @@ export const api = {
       file: File;
       uploadedBy: string;
     }): Promise<Attachment> {
-      const path = `${input.spaceId}/${input.itemId}/${crypto.randomUUID()}-${input.file.name}`;
+      const path = `${input.spaceId}/${input.itemId}/${crypto.randomUUID()}-${storageSafeName(input.file.name)}`;
       const up = await supabase.storage.from(BUCKETS.attachments).upload(path, input.file, {
         contentType: input.file.type,
         upsert: false,

@@ -242,7 +242,8 @@
     "keepHere": "Mantener la tarjeta aquí también",
     "keepHereHint": "Una copia va al otro Espacio. Metas, valores cerrados e historial siguen contando aquí.",
     "removeHere": "Sacar la tarjeta de este Espacio",
-    "removeHereHint": "La tarjeta se va definitivamente. Los informes de este Espacio dejan de contarla y el historial se va con ella."
+    "removeHereHint": "La tarjeta se va definitivamente. Los informes de este Espacio dejan de contarla y el historial se va con ella.",
+    "uploadFailed": "No pude subir el archivo. Inténtalo de nuevo."
   },
   "fields": {
     "text": "Texto",

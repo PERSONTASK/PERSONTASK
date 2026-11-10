@@ -242,7 +242,8 @@
     "keepHere": "Manter o card aqui também",
     "keepHereHint": "Uma cópia vai para o outro Espaço. Metas, valores fechados e histórico continuam contando aqui.",
     "removeHere": "Tirar o card deste Espaço",
-    "removeHereHint": "O card sai daqui de vez. Os relatórios deste Espaço deixam de contá-lo e o histórico vai junto."
+    "removeHereHint": "O card sai daqui de vez. Os relatórios deste Espaço deixam de contá-lo e o histórico vai junto.",
+    "uploadFailed": "Não consegui enviar o arquivo. Tente de novo."
   },
   "fields": {
     "text": "Texto",
