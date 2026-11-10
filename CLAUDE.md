@@ -179,4 +179,16 @@ Os créditos do Netlify acabaram (plano Free gasta 15 créditos por deploy de pr
 - **Variáveis de build** no painel do Cloudflare: `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY`. O `VITE_APP_URL` fica **de fora** de propósito — sem ele o código cai em `window.location.origin` e funciona em qualquer endereço sem rebuild.
 - **Node 20** vem do `.nvmrc` (vale para Cloudflare e Netlify).
 - Endereço provisório: `https://persontask.joabe-reis2.workers.dev`.
-- **O domínio `persontask.com.br` continua no Netlify** — DNS na Locaweb, apex por A para 75.2.60.5 e `www` por CNAME para `persontask.netlify.app`. A troca ficou para depois: o Cloudflare só aceita domínio raiz se o DNS estiver nos nameservers dele, e mover isso exige recriar os registros do Resend (`resend._domainkey`, `send`, `rsend`, `_dmarc`), que são o que faz o e-mail do app chegar. **Não há registro MX** (o e-mail humano é Gmail).
+- **Domínio migrado para o Cloudflare (10/11/2026).** `persontask.com.br` e `www` são Custom Domains do Worker `persontask`. O DNS saiu da Locaweb: os nameservers no registro.br (alterados pelo painel da Locaweb, porque ela é o Provedor de Serviços e o bloco de DNS do registro.br fica só-leitura) agora são `celine.ns.cloudflare.com` e `milan.ns.cloudflare.com`.
+  - ⚠️ O escaneamento do Cloudflare **não** importou `send` e `rsend` — registros de DNS não podem ser listados, só adivinhados. Sempre confira a zona contra uma captura feita antes.
+  - ⚠️ Adicionar um Custom Domain **falha** se já houver registro A/CNAME naquele nome: é preciso apagar o antigo primeiro (breve janela sem ar).
+  - O Netlify saiu de cena. A zona antiga segue na Locaweb, inerte, como plano B.
+
+## ⚠️ Verificar deploy: olhe o CONTEÚDO, não o código HTTP
+O app devolve `index.html` para **qualquer** rota desconhecida (regra de SPA). Logo, `curl -o /dev/null -w "%{http_code}"` devolve **200 para tudo** — inclusive para arquivo que não existe. Isso já levou a um diagnóstico errado ("as páginas legais estão no ar" quando não estavam).
+
+Verificação correta:
+```bash
+curl -sL https://persontask.com.br/termos.html | grep -o "<title>[^<]*"
+curl -s https://persontask.com.br/ | grep -o 'assets/index-[A-Za-z0-9_-]*\.js'   # compara com dist/index.html
+```
