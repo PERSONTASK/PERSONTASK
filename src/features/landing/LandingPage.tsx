@@ -228,9 +228,17 @@ export function LandingPage() {
               © {new Date().getFullYear()} PERSONTASK · {t('landing.rights')}
             </p>
           </div>
-          <a href="/manual.html" className="text-xs text-ink-soft hover:text-brand-indigo">
-            {t('nav.manual')}
-          </a>
+          <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+            <a href="/manual.html" className="text-xs text-ink-soft hover:text-brand-indigo">
+              {t('nav.manual')}
+            </a>
+            <a href="/termos.html" className="text-xs text-ink-soft hover:text-brand-indigo">
+              {t('legal.terms')}
+            </a>
+            <a href="/privacidade.html" className="text-xs text-ink-soft hover:text-brand-indigo">
+              {t('legal.privacy')}
+            </a>
+          </nav>
         </div>
       </footer>
     </div>

@@ -127,6 +127,19 @@ export function SignupPage() {
         <button type="submit" className="btn-primary w-full" disabled={busy}>
           {busy ? <Spinner /> : t('auth.signup')}
         </button>
+
+        {/* Ciência dos documentos legais no ato do cadastro (LGPD) */}
+        <p className="text-center text-[11px] leading-snug text-ink-faint">
+          {t('legal.consentBefore')}{' '}
+          <a href="/termos.html" target="_blank" rel="noopener" className="text-brand-indigo hover:underline">
+            {t('legal.terms')}
+          </a>{' '}
+          {t('legal.consentAnd')}{' '}
+          <a href="/privacidade.html" target="_blank" rel="noopener" className="text-brand-indigo hover:underline">
+            {t('legal.privacy')}
+          </a>
+          .
+        </p>
       </form>
       <p className="mt-6 text-center text-sm text-ink-soft">
         {t('auth.haveAccount')}{' '}

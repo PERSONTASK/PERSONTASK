@@ -593,5 +593,11 @@
     "g4": "Report",
     "g4Text": "Open value, conversion and wins per month — with export to Excel and PDF.",
     "poweredBy": "Powered by TECHCONN Tecnologia"
+  },
+  "legal": {
+    "terms": "Terms of Use",
+    "privacy": "Privacy Policy",
+    "consentBefore": "By creating an account, you agree to the",
+    "consentAnd": "and the"
   }
 }

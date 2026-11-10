@@ -593,5 +593,11 @@
     "g4": "Informe",
     "g4Text": "Valor abierto, conversión y ganados por mes — con exportación a Excel y PDF.",
     "poweredBy": "Powered by TECHCONN Tecnologia"
+  },
+  "legal": {
+    "terms": "Términos de Uso",
+    "privacy": "Política de Privacidad",
+    "consentBefore": "Al crear tu cuenta, aceptas los",
+    "consentAnd": "y la"
   }
 }
