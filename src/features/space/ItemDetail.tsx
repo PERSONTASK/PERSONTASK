@@ -559,7 +559,7 @@ function MoveCopyDialog({
   /** Padrão do Espaço para "manter o card aqui". */
   keepDefault: boolean;
   onClose: () => void;
-  onDone: (mode: 'copy' | 'move') => void;
+  onDone: (mode: 'copy' | 'move', fieldsCopied: number) => void;
 }) {
   const { t } = useTranslation();
   const [spaceId, setSpaceId] = useState('');
@@ -575,6 +575,8 @@ function MoveCopyDialog({
    * mudar na hora.
    */
   const [keep, setKeep] = useState(keepDefault);
+  /** Preenchido ao concluir: segura o diálogo aberto para mostrar o que foi. */
+  const [result, setResult] = useState<{ mode: 'copy' | 'move'; fields: number } | null>(null);
 
   useEffect(() => {
     if (!spaceId) {
@@ -612,9 +614,12 @@ function MoveCopyDialog({
     setError('');
     try {
       const input = { sourceId: item.id, targetSpaceId: spaceId, targetColumnId: columnId, createdBy };
-      if (mode === 'copy') await api.items.copyToSpace(input);
-      else await api.items.moveToSpace(input);
-      onDone(mode);
+      const fields = mode === 'copy'
+        ? await api.items.copyToSpace(input)
+        : await api.items.moveToSpace(input);
+      // Mostra o resultado antes de fechar: ao MOVER, o painel do card
+      // some junto, e a pessoa perderia o aviso de campo descartado.
+      setResult({ mode, fields });
     } catch {
       setError(t('errors.permission'));
     } finally {
@@ -631,17 +636,36 @@ function MoveCopyDialog({
       title={t('item.moveCopyTitle')}
       width={430}
       footer={
-        <>
-          <button className="btn-secondary" onClick={onClose}>
-            {t('common.cancel')}
+        result ? (
+          <button className="btn-primary" onClick={() => onDone(result.mode, result.fields)}>
+            {t('common.close')}
           </button>
-          <button className="btn-primary" onClick={() => run(keep ? 'copy' : 'move')} disabled={!ready}>
-            {busy ? <Spinner /> : keep ? <Copy size={15} /> : <ArrowRightLeft size={15} />}{' '}
-            {t('item.migrateAction')}
-          </button>
-        </>
+        ) : (
+          <>
+            <button className="btn-secondary" onClick={onClose}>
+              {t('common.cancel')}
+            </button>
+            <button className="btn-primary" onClick={() => run(keep ? 'copy' : 'move')} disabled={!ready}>
+              {busy ? <Spinner /> : keep ? <Copy size={15} /> : <ArrowRightLeft size={15} />}{' '}
+              {t('item.migrateAction')}
+            </button>
+          </>
+        )
       }
     >
+      {result ? (
+        <div className="space-y-3 py-2 text-center">
+          <CheckCircle2 size={34} className="mx-auto text-emerald-500" />
+          <p className="text-sm font-semibold">
+            {result.mode === 'copy' ? t('item.migrateDoneCopy') : t('item.migrateDoneMove')}
+          </p>
+          <p className="text-xs text-ink-soft">
+            {result.fields > 0
+              ? t('item.migrateFieldsKept', { count: result.fields })
+              : t('item.migrateFieldsNone')}
+          </p>
+        </div>
+      ) : (
       <div className="space-y-4">
         <p className="text-sm text-ink-soft">{t('item.moveCopyHint')}</p>
         <div>
@@ -723,6 +747,7 @@ function MoveCopyDialog({
         </div>
         {error && <p className="text-sm text-red-500">{error}</p>}
       </div>
+      )}
     </Modal>
   );
 }

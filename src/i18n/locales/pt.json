@@ -243,7 +243,12 @@
     "keepHereHint": "Uma cópia vai para o outro Espaço. Metas, valores fechados e histórico continuam contando aqui.",
     "removeHere": "Tirar o card deste Espaço",
     "removeHereHint": "O card sai daqui de vez. Os relatórios deste Espaço deixam de contá-lo e o histórico vai junto.",
-    "uploadFailed": "Não consegui enviar o arquivo. Tente de novo."
+    "uploadFailed": "Não consegui enviar o arquivo. Tente de novo.",
+    "migrateFieldsKept": "{{count}} campo personalizado foi junto",
+    "migrateFieldsKept_other": "{{count}} campos personalizados foram junto",
+    "migrateFieldsNone": "Nenhum campo personalizado foi junto — o Espaço de destino não tem campos com o mesmo nome e tipo.",
+    "migrateDoneCopy": "Card copiado",
+    "migrateDoneMove": "Card movido"
   },
   "fields": {
     "text": "Texto",
@@ -262,7 +267,11 @@
     "deleteField": "Excluir campo",
     "deleteConfirm": "Excluir o campo \"{{name}}\" de todo o Espaço? Os valores preenchidos serão perdidos.",
     "money": "Moeda",
-    "moneyHint": "Exibe o número como dinheiro, na moeda do Espaço (ex.: R$ 41.150,00)."
+    "moneyHint": "Exibe o número como dinheiro, na moeda do Espaço (ex.: R$ 41.150,00).",
+    "moveUp": "Subir na ordem do card",
+    "moveDown": "Descer na ordem do card",
+    "faceHint": "A visibilidade vale para todos os cards, inclusive os que já existem.",
+    "orderHint": "As setas mudam a ordem em que os campos aparecem dentro do card."
   },
   "checklist": {
     "section": "Checklists",

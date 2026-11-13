@@ -129,12 +129,72 @@ function buildTemplateSchedule(
  * destino consegue inserir lá (por isso, na prática, só o Administrador que
  * interligou os Espaços — membros comuns nem enxergam o outro Espaço).
  */
+/**
+ * Leva os valores dos campos personalizados de um Espaço para outro.
+ *
+ * Campos pertencem ao Espaço, então o do destino é outro registro. Só
+ * viaja o valor cujo campo **existe nos dois com o mesmo nome e o mesmo
+ * tipo** — comparando o nome sem diferenciar maiúsculas nem espaços nas
+ * pontas. Em lista suspensa, a opção escolhida também precisa existir no
+ * destino: senão o card chegaria exibindo um valor que o campo de lá não
+ * oferece. O que não casa é simplesmente descartado.
+ *
+ * Devolve quantos valores foram levados, para a tela poder informar.
+ */
+async function copyMatchingFieldValues(input: {
+  sourceItemId: string;
+  targetItemId: string;
+  sourceSpaceId: string;
+  targetSpaceId: string;
+}): Promise<number> {
+  if (input.sourceSpaceId === input.targetSpaceId) return 0; // mesmo Espaço: nada a traduzir
+
+  const [srcDefs, dstDefs, values] = await Promise.all([
+    supabase.from('custom_field_defs').select('id, name, type').eq('space_id', input.sourceSpaceId),
+    supabase.from('custom_field_defs').select('id, name, type, config').eq('space_id', input.targetSpaceId),
+    supabase
+      .from('item_field_values')
+      .select('field_def_id, value, show_on_face')
+      .eq('item_id', input.sourceItemId),
+  ]);
+
+  const rows = values.data ?? [];
+  if (!rows.length || !(dstDefs.data ?? []).length) return 0;
+
+  const key = (name: string, type: string) => `${name.trim().toLowerCase()}|${type}`;
+  const sourceById = new Map((srcDefs.data ?? []).map((d: any) => [d.id, d]));
+  const targetByKey = new Map((dstDefs.data ?? []).map((d: any) => [key(d.name, d.type), d]));
+
+  const toInsert = rows.flatMap((v: any) => {
+    const from = sourceById.get(v.field_def_id);
+    if (!from) return [];
+    const to: any = targetByKey.get(key(from.name, from.type));
+    if (!to) return []; // nome ou tipo diferente, ou campo inexistente
+    if (to.type === 'select' && v.value !== null && v.value !== '') {
+      const options: string[] = to.config?.options ?? [];
+      if (!options.includes(String(v.value))) return []; // opção não existe no destino
+    }
+    return [{
+      item_id: input.targetItemId,
+      field_def_id: to.id,
+      value: v.value,
+      show_on_face: v.show_on_face,
+    }];
+  });
+
+  if (toInsert.length) {
+    const r = await supabase.from('item_field_values').insert(toInsert);
+    if (r.error) throw r.error;
+  }
+  return toInsert.length;
+}
+
 async function copyItemToSpace(input: {
   sourceId: string;
   targetSpaceId: string;
   targetColumnId: string;
   createdBy: string;
-}): Promise<string> {
+}): Promise<{ id: string; fieldsCopied: number }> {
   const { data: src, error } = await supabase.from('items').select('*').eq('id', input.sourceId).single();
   if (error) throw error;
   const s = src as any;
@@ -165,9 +225,17 @@ async function copyItemToSpace(input: {
   });
   if (ins.error) throw ins.error;
 
+  // Campos personalizados compatíveis entre os dois Espaços.
+  const fieldsCopied = await copyMatchingFieldValues({
+    sourceItemId: input.sourceId,
+    targetItemId: newId,
+    sourceSpaceId: s.space_id,
+    targetSpaceId: input.targetSpaceId,
+  });
+
   const { data: atts } = await supabase.from('attachments').select('*').eq('item_id', input.sourceId);
   for (const a of atts ?? []) {
-    const newPath = `${input.targetSpaceId}/${newId}/${crypto.randomUUID()}-${a.file_name}`;
+    const newPath = `${input.targetSpaceId}/${newId}/${crypto.randomUUID()}-${storageSafeName(a.file_name)}`;
     const cp = await supabase.storage.from(BUCKETS.attachments).copy(a.storage_path, newPath);
     if (!cp.error) {
       await supabase.from('attachments').insert({
@@ -181,7 +249,7 @@ async function copyItemToSpace(input: {
       });
     }
   }
-  return newId;
+  return { id: newId, fieldsCopied };
 }
 
 export const api = {
@@ -636,14 +704,17 @@ export const api = {
         .filter((r) => r.id !== exceptId && r.schedule_tasks.length > 0);
     },
     /** Copia o Item para outro Espaço interligado (só Administrador na prática — ver copyItemToSpace). */
-    async copyToSpace(input: { sourceId: string; targetSpaceId: string; targetColumnId: string; createdBy: string }): Promise<void> {
-      await copyItemToSpace(input);
+    /** Devolve quantos campos personalizados couberam no Espaço de destino. */
+    async copyToSpace(input: { sourceId: string; targetSpaceId: string; targetColumnId: string; createdBy: string }): Promise<number> {
+      const r = await copyItemToSpace(input);
+      return r.fieldsCopied;
     },
     /** Move o Item para outro Espaço interligado: copia e remove o original. */
-    async moveToSpace(input: { sourceId: string; targetSpaceId: string; targetColumnId: string; createdBy: string }): Promise<void> {
-      await copyItemToSpace(input);
+    async moveToSpace(input: { sourceId: string; targetSpaceId: string; targetColumnId: string; createdBy: string }): Promise<number> {
+      const r = await copyItemToSpace(input);
       const { error } = await supabase.from('items').delete().eq('id', input.sourceId);
       if (error) throw error;
+      return r.fieldsCopied;
     },
     async create(input: {
       columnId: string;
@@ -765,6 +836,36 @@ export const api = {
     async updateDef(id: string, patch: Partial<CustomFieldDef>): Promise<void> {
       const { error } = await supabase.from('custom_field_defs').update(patch).eq('id', id);
       if (error) throw error;
+    },
+    /** Nova ordem dos campos no card — a lista vem já na ordem desejada. */
+    async reorderDefs(orderedIds: string[]): Promise<void> {
+      await Promise.all(
+        orderedIds.map((id, position) =>
+          supabase.from('custom_field_defs').update({ position }).eq('id', id),
+        ),
+      );
+    },
+    /**
+     * Liga/desliga o campo na face do card **em todos os cards**, não só
+     * nos próximos.
+     *
+     * Cada `item_field_values` guarda o próprio `show_on_face`, para que
+     * a pessoa possa esconder o campo num card específico. O efeito
+     * colateral é que mudar só o padrão do Espaço não alcançava os cards
+     * que já tinham valor — e era isso que fazia parecer que a
+     * configuração "não funcionava" nos cards antigos.
+     */
+    async setFaceVisibility(defId: string, show: boolean): Promise<void> {
+      const def = await supabase
+        .from('custom_field_defs')
+        .update({ show_on_face_default: show })
+        .eq('id', defId);
+      if (def.error) throw def.error;
+      const vals = await supabase
+        .from('item_field_values')
+        .update({ show_on_face: show })
+        .eq('field_def_id', defId);
+      if (vals.error) throw vals.error;
     },
     async removeDef(id: string): Promise<void> {
       const { error } = await supabase.from('custom_field_defs').delete().eq('id', id);

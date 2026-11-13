@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Trash2, X } from 'lucide-react';
+import { Plus, Trash2, X, ChevronUp, ChevronDown } from 'lucide-react';
 import { api } from '@/lib/api';
 import type { CustomFieldDef, FieldType } from '@/types';
 
@@ -53,8 +53,19 @@ export function FieldsManager({
     await onChanged();
   }
 
+  /** Vale para todos os cards, inclusive os que já existem. */
   async function toggleFace(def: CustomFieldDef) {
-    await api.fields.updateDef(def.id, { show_on_face_default: !def.show_on_face_default });
+    await api.fields.setFaceVisibility(def.id, !def.show_on_face_default);
+    await onChanged();
+  }
+
+  /** Move o campo na ordem em que ele aparece dentro do card. */
+  async function move(index: number, dir: -1 | 1) {
+    const target = index + dir;
+    if (target < 0 || target >= fieldDefs.length) return;
+    const ids = fieldDefs.map((d) => d.id);
+    [ids[index], ids[target]] = [ids[target], ids[index]];
+    await api.fields.reorderDefs(ids);
     await onChanged();
   }
 
@@ -66,9 +77,33 @@ export function FieldsManager({
 
   return (
     <div className="space-y-3">
-      {fieldDefs.map((def) => (
+      {fieldDefs.length > 1 && (
+        <p className="text-[11px] leading-snug text-ink-faint">
+          {t('fields.orderHint')} {t('fields.faceHint')}
+        </p>
+      )}
+      {fieldDefs.map((def, index) => (
         <div key={def.id} className="rounded-lg border border-line/10 bg-surface-raised p-3">
           <div className="flex items-center gap-2">
+            {/* Ordem em que o campo aparece dentro do card */}
+            <div className="flex shrink-0 flex-col">
+              <button
+                className="text-ink-faint transition hover:text-ink disabled:opacity-30"
+                title={t('fields.moveUp')}
+                disabled={index === 0}
+                onClick={() => move(index, -1)}
+              >
+                <ChevronUp size={14} />
+              </button>
+              <button
+                className="text-ink-faint transition hover:text-ink disabled:opacity-30"
+                title={t('fields.moveDown')}
+                disabled={index === fieldDefs.length - 1}
+                onClick={() => move(index, 1)}
+              >
+                <ChevronDown size={14} />
+              </button>
+            </div>
             <span className="flex-1 text-sm font-semibold">{def.name}</span>
             <span className="rounded-full bg-brand-indigo/10 px-2 py-0.5 text-[10px] font-bold text-brand-indigo">
               {t(`fields.${def.type}`)}

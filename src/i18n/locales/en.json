@@ -243,7 +243,12 @@
     "keepHereHint": "A copy goes to the other Space. Targets, closed value and history keep counting here.",
     "removeHere": "Take the card out of this Space",
     "removeHereHint": "The card leaves for good. This Space reports stop counting it and the history goes with it.",
-    "uploadFailed": "Could not upload the file. Please try again."
+    "uploadFailed": "Could not upload the file. Please try again.",
+    "migrateFieldsKept": "{{count}} custom field came along",
+    "migrateFieldsKept_other": "{{count}} custom fields came along",
+    "migrateFieldsNone": "No custom field came along — the destination Space has no field with the same name and type.",
+    "migrateDoneCopy": "Card copied",
+    "migrateDoneMove": "Card moved"
   },
   "fields": {
     "text": "Text",
@@ -262,7 +267,11 @@
     "deleteField": "Delete field",
     "deleteConfirm": "Delete the field \"{{name}}\" from the whole Space? Filled values will be lost.",
     "money": "Money",
-    "moneyHint": "Shows the number as money, in the Space currency (e.g. $41,150.00)."
+    "moneyHint": "Shows the number as money, in the Space currency (e.g. $41,150.00).",
+    "moveUp": "Move up in the card",
+    "moveDown": "Move down in the card",
+    "faceHint": "Visibility applies to every card, including the ones that already exist.",
+    "orderHint": "The arrows change the order the fields appear in inside the card."
   },
   "checklist": {
     "section": "Checklists",

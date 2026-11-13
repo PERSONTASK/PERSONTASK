@@ -52,7 +52,7 @@ supabase/       schema.sql, cron.sql, functions/
 - Campos personalizados (`custom_field_defs`): tipos text/number/datetime/**checkbox**/select (checklist foi removido dos campos).
 
 ## Onboarding (card de boas-vindas + manual)
-- **Manual do usuário:** `public/manual.html` (14 seções, reescrito em nov/2026 cobrindo CRM, cronograma, relatórios, avisos e moeda) + `public/PERSONTASK-Manual.pdf`. **Pipeline atual:** o PDF sai do próprio HTML, com Edge headless — `msedge --headless --no-pdf-header-footer --print-to-pdf="<abs>" --virtual-time-budget=12000 "http://localhost:5173/manual.html"` (precisa do `npm run dev` no ar). A rota antiga por docx-js + Word COM foi abandonada: gerar do HTML mantém os dois idênticos.
+- **Manual do usuário:** `public/manual.html` (14 seções, reescrito em nov/2026 cobrindo CRM, cronograma, relatórios, avisos e moeda) + `public/PERSONTASK-Manual.pdf`. **Pipeline atual:** o PDF sai do próprio HTML, com Chrome ou Edge headless — `chrome --headless --no-pdf-header-footer --print-to-pdf="<abs>" --virtual-time-budget=12000 "http://localhost:5173/manual.html"` (precisa do `npm run dev` no ar). ⚠️ Se o navegador já estiver aberto, a instância headless sai sem escrever nada e sem erro: passe `--user-data-dir` para um perfil temporário, ou use o outro navegador. O Chrome aguentou quando o Edge recusou.. A rota antiga por docx-js + Word COM foi abandonada: gerar do HTML mantém os dois idênticos.
 - **Card automático:** ao criar Espaço, `CreateSpaceDialog` chama `api.spaces.seedWelcome` → Painel "Bem-vindo" + Coluna + Item **"🧭 ESTÁ PERDIDO?! COMECE POR AQUI"** com os links do manual, no idioma atual (chaves i18n `welcome.*`). Não bloqueia a criação se falhar.
 - **Acesso permanente:** `ProfileMenu` tem link **"Manual / Ajuda"** (`nav.manual`) → `${APP_URL}/manual.html` (nova aba).
 - **Links clicáveis:** `ItemDetail` transforma URLs da descrição em botões (`extractUrls`) abaixo do textarea.
@@ -199,3 +199,11 @@ A chave do Supabase Storage aceita só um conjunto restrito de caracteres. Nome 
 `api.attachments.upload` passa o nome por `storageSafeName()`: tira acento por NFD, troca o resto por `-` e corta pela frente em 120 caracteres (a extensão fica no fim e sobrevive). O nome original continua em `attachments.file_name`, que é o que aparece na lista.
 
 O `AttachmentsEditor` ganhou um `catch` junto: sem ele o erro virava *unhandled rejection* — o círculo parava e nada era dito, deixando a pessoa sem pista nenhuma.
+
+## Campos personalizados: migração, ordem e visibilidade (nov/2026)
+- **Migrar card entre Espaços leva os campos compatíveis.** `copyMatchingFieldValues()` em `api.ts` casa os campos de origem e destino por **nome (sem diferenciar maiúsculas/espaços) + tipo**. Em `select`, a opção escolhida também precisa existir no destino — senão o card chegaria exibindo um valor que o campo de lá não oferece. O que não casa é descartado.
+  - `copyItemToSpace` passou a devolver `{ id, fieldsCopied }`, e `copyToSpace`/`moveToSpace` devolvem a contagem.
+  - O `MoveCopyDialog` **não fecha mais sozinho**: mostra quantos campos foram junto (ou que nenhum coube) e espera o Fechar. Ao *mover*, o painel do card some em seguida, então avisar antes era a única forma de a pessoa ver.
+  - ⚠️ O mesmo bug de `Invalid key` dos anexos existia aqui: a cópia montava o caminho com `a.file_name` cru. Agora passa por `storageSafeName()`.
+- **Ordem dentro do card:** setas ↑↓ no `FieldsManager` → `api.fields.reorderDefs(orderedIds)` regrava `position`. O card lê `fieldDefs` já ordenado por `position`.
+- **Visibilidade vale para os cards que JÁ existem:** `api.fields.setFaceVisibility(defId, show)` grava o `show_on_face_default` **e** atualiza todas as linhas de `item_field_values` daquele campo. Antes só mudava o padrão, e o card que já tinha valor mantinha o próprio `show_on_face` — era isso que fazia a configuração parecer sem efeito nos cards antigos. O botão de olho dentro do card segue valendo como exceção individual.
